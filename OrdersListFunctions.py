@@ -13,6 +13,8 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image
 from reportlab.lib import colors
 from streamlit.components.v1 import html
 
+from streamlit_autorefresh import st_autorefresh
+
 
 def insert_selected_rows(selected_rows):
     client = MongoClient("mongodb://localhost:27017/")
@@ -90,15 +92,15 @@ def insert_pre(selected_rows):
 
     collection14 = db['PreSelectedOrders']
     collection14.drop()
-    for row in selected_rows:
 
+    for row in selected_rows:
         existing_document = collection14.find_one({'Number': row['Number']})
 
         if not existing_document:
             ppselected_orders = collection14.insert_one({'Number': row['Number']})
 
 
-def find_pre(order_df):
+def find_pre(order_df, table_ids_selected):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection14 = db['PreSelectedOrders']
@@ -106,7 +108,6 @@ def find_pre(order_df):
     pred = collection14.find({}, {'_id': 0, 'Number': 1})
 
     df_pre_selected = pd.DataFrame(list(pred))
-    table_ids_selected = {}
 
     if df_pre_selected.empty:
         re_selected_orders = []
@@ -119,10 +120,10 @@ def find_pre(order_df):
                 position = order_df.index[order_df['Number'] == number][0]
                 table_ids_selected[str(position)] = True
 
-        return table_ids_selected
+    return table_ids_selected
 
 
-def create_grid(table_ids_selected):
+def create_grid():
     data = find_data_order()
 
     order_df = pd.DataFrame(find_data_order(),
@@ -134,8 +135,6 @@ def create_grid(table_ids_selected):
                      'Quantity': d['quantity'], 'Color': d['color'], 'Dimensions': d['dimensions']} for d in data]
 
     order_df = pd.DataFrame(data_renamed)
-
-    find_pre(order_df)
 
     gd = GridOptionsBuilder.from_dataframe(order_df)
 
@@ -186,6 +185,9 @@ def create_grid(table_ids_selected):
             }
         """)
 
+    table_ids_selected = {}
+    find_pre(order_df, table_ids_selected)
+
     gd.configure_default_column(columns_auto_size_mode=True, cellStyle=cell_style, editable=True, groupable=True,
                                 resizable=True)
 
@@ -193,10 +195,13 @@ def create_grid(table_ids_selected):
 
     # gd.configure_side_bar(columns_panel=True)
     gd.configure_column("Time Gap", cellStyle=cell_style)
+
     grid_options = gd.build()
 
     grid_container = AgGrid(order_df, gridOptions=grid_options, theme='material',
-                            update_mode=GridUpdateMode.SELECTION_CHANGED, allow_unsafe_jscode=True)
+                            update_mode=GridUpdateMode.MODEL_CHANGED, allow_unsafe_jscode=True, reload_data=False,
+                            key=f"{order_df}")
+
     return grid_container
 
 

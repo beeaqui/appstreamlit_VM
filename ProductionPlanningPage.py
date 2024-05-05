@@ -54,10 +54,8 @@ def production_page():
     count1 = collection1.count_documents({})
 
     if count1 != 0:
-        table_ids_selected = {}
 
-        # Create a grid container for displaying new rows/orders
-        grid_container = create_grid(table_ids_selected)
+        grid_container = create_grid()
         selected_rows = grid_container["selected_rows"]
         insert_pre(selected_rows)
 
