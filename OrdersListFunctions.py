@@ -16,9 +16,7 @@ from streamlit.components.v1 import html
 
 def insert_selected_rows(selected_rows):
     client = MongoClient("mongodb://localhost:27017/")
-
     db = client['local']
-
     collection2 = db['selectedOrders']
 
     for row in selected_rows:
@@ -82,11 +80,49 @@ def find_data_order():
     data = collection.find({}, {'_id': 0, 'number': 1,
                                 'reference': 1, 'delivery_date': 1, 'time_gap': 1, 'description': 1,
                                 'model': 1, 'quantity': 1, 'color': 1, 'dimensions': 1})
-
     return data
 
 
-def create_grid():
+def insert_pre(selected_rows):
+    client = MongoClient("mongodb://localhost:27017/")
+
+    db = client['local']
+
+    collection14 = db['PreSelectedOrders']
+    collection14.drop()
+    for row in selected_rows:
+
+        existing_document = collection14.find_one({'Number': row['Number']})
+
+        if not existing_document:
+            ppselected_orders = collection14.insert_one({'Number': row['Number']})
+
+
+def find_pre(order_df):
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection14 = db['PreSelectedOrders']
+
+    pred = collection14.find({}, {'_id': 0, 'Number': 1})
+
+    df_pre_selected = pd.DataFrame(list(pred))
+    table_ids_selected = {}
+
+    if df_pre_selected.empty:
+        re_selected_orders = []
+    else:
+        re_selected_orders = df_pre_selected['Number']
+
+        for number in re_selected_orders:
+
+            if number in order_df['Number'].values:
+                position = order_df.index[order_df['Number'] == number][0]
+                table_ids_selected[str(position)] = True
+
+        return table_ids_selected
+
+
+def create_grid(table_ids_selected):
     data = find_data_order()
 
     order_df = pd.DataFrame(find_data_order(),
@@ -98,6 +134,8 @@ def create_grid():
                      'Quantity': d['quantity'], 'Color': d['color'], 'Dimensions': d['dimensions']} for d in data]
 
     order_df = pd.DataFrame(data_renamed)
+
+    find_pre(order_df)
 
     gd = GridOptionsBuilder.from_dataframe(order_df)
 
@@ -150,8 +188,10 @@ def create_grid():
 
     gd.configure_default_column(columns_auto_size_mode=True, cellStyle=cell_style, editable=True, groupable=True,
                                 resizable=True)
+
+    gd.configure_selection(selection_mode="multiple", use_checkbox=True, pre_selected_rows=table_ids_selected)
+
     # gd.configure_side_bar(columns_panel=True)
-    gd.configure_selection(selection_mode="multiple", use_checkbox=True)
     gd.configure_column("Time Gap", cellStyle=cell_style)
     grid_options = gd.build()
 
@@ -371,6 +411,7 @@ def create_grid_selected_rows():
                                                 'Dimensions': "Dimensions"
                                             },
                                             hide_index=True)
+
     return data_frame_selected_rows
 
 

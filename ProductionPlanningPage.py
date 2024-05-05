@@ -54,20 +54,27 @@ def production_page():
     count1 = collection1.count_documents({})
 
     if count1 != 0:
+        table_ids_selected = {}
+
         # Create a grid container for displaying new rows/orders
-        grid_container = create_grid()
+        grid_container = create_grid(table_ids_selected)
+        selected_rows = grid_container["selected_rows"]
+        insert_pre(selected_rows)
 
         col1, col2, col3 = st.columns(3)
+
         with col3:
             submit_button = st.button('Order Release', key='selected_rows_button', type='primary',
                                       help='Submit customer order for production.',
                                       use_container_width=True)
             if submit_button:
-                selected_rows = grid_container["selected_rows"]
 
                 delete_selected_rows(selected_rows)
 
                 insert_selected_rows(selected_rows)
+
+                collection14 = db['PreSelectedOrders']
+                collection14.drop()
 
                 insert_datetime_selected_rows(selected_rows)
 

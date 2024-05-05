@@ -57,6 +57,7 @@ def run():
         collection11 = db['TimeExpeditionEnd']
         collection12 = db['LeadTimeOrders']
         collection13 = db['CumulativeOrdersFinished']
+        collection14 = db['PreSelectedOrders']
 
         print("Connected successfully")
         i = 0
@@ -74,6 +75,7 @@ def run():
         collection11.drop()
         collection12.drop()
         collection13.drop()
+        collection14.drop()
 
         while not keep_on_going_event.is_set():
             order = generate_random_order()
