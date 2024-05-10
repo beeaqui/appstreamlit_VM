@@ -1,9 +1,10 @@
 # Imports
 import streamlit as st
 from pymongo import MongoClient
-import streamlit_authenticator as stauth
 import datetime
 import re
+from streamlit_authenticator.utilities.hasher import Hasher
+
 
 # Connect to MongoDB database
 client = MongoClient("mongodb://localhost:27017/")
@@ -73,12 +74,16 @@ def validate_username(username):
 
 # Function to handle user sign-up process
 def sign_up():
-    with st.form(key='signup', clear_on_submit=True):
-        st.subheader(':blue[Sign Up]')
+    with st.form(key='signup'):
+        st.subheader(':gray98[Sign Up]')
+
         email = st.text_input('Email', placeholder='Enter your Email')
+
         username = st.text_input('Username', placeholder='Enter your Username')
+
         key = st.selectbox('Choose your key', ("Supervisor", "Production Planning",
                                                "Assembly Process", "Quality Control", "Expedition", "Other"))
+
         password = st.text_input('Password', placeholder='Enter your Password', type='password')
         conf_password = st.text_input('Confirm Password', placeholder='Confirm your Password', type='password')
 
@@ -90,7 +95,7 @@ def sign_up():
                             if len(username) >= 2:
                                 if len(password) >= 3:
                                     if password == conf_password:
-                                        hashed_password = stauth.Hasher([conf_password]).generate()
+                                        hashed_password = Hasher([conf_password]).generate()
                                         insert_user(email, username, key, hashed_password[0])
                                         st.success('Account created successfully. Log in to get started!')
                                     else:
@@ -112,7 +117,8 @@ def sign_up():
                 st.warning('Invalid email address. Please provide a valid email address.')
 
         bt1, bt2, bt3, bt4, bt5 = st.columns(5)
-        with bt3:
+
+        with bt1:
             st.form_submit_button('Sign In')
 
 
