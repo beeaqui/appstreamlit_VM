@@ -10,7 +10,7 @@ charset-normalizer==3.3.2
 click==8.1.7
 dnspython==2.6.1
 entrypoints==0.4
-extra-streamlit-components==0.1.70
+extra-streamlit-components==0.1.71
 gekko==1.1.1
 gitdb==4.0.11
 GitPython==3.1.43
@@ -47,7 +47,7 @@ six==1.16.0
 smmap==5.0.1
 streamlit==1.33.0
 streamlit-aggrid==0.3.4.post3
-streamlit-authenticator==0.3.2
+streamlit-authenticator==0.2.3
 streamlit-autorefresh==1.0.1
 streamlit-option-menu==0.3.12
 tenacity==8.2.3
