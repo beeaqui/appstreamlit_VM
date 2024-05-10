@@ -7,3 +7,9 @@ font="sans serif"
 
 [browser]
 serverAddress = "localhost"
+
+[server]
+enableCORS = false
+enableXsrfProtection = false
+
+
