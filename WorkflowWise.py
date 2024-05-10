@@ -5,10 +5,10 @@ from ExpeditionPage import *
 from SupervisorPage import *
 from AssemblyPage import *
 from OtherPage import *
+from SignUp import sign_up, fetch_users, get_key
 
 from streamlit_option_menu import option_menu
-import streamlit_authenticator as stauth
-from SignUp import sign_up, fetch_users, get_key
+from streamlit_authenticator import Authenticate
 
 
 # Define a function named 'website' where it is all the design part of the application
@@ -33,12 +33,11 @@ def website():
             credentials['usernames'][usernames[index]] = {'name': emails[index], 'password': passwords[index]}
 
         # Authenticate users using the provided credentials and create a session cookie
-        Authenticator = stauth.Authenticate(credentials, cookie_name='Streamlit',
-                                            key='login_authentication', cookie_expiry_days=4)
+        Authenticator = Authenticate(credentials, cookie_name='Streamlit', cookie_key='key', cookie_expiry_days=4)
 
-        email, authentication_status, username = Authenticator.login(':blue[Login]', 'main')
+        email, authentication_status, username = Authenticator.login()
 
-        info, info1 = st.columns(2)
+        c = st.container()
 
         if not authentication_status:
             sign_up()
@@ -100,15 +99,9 @@ def website():
                     if selected == 'Production Trajectory':
                         other_page()
 
-                elif not authentication_status:
-                    with info:
-                        st.error('Invalid username or password. Please check your credentials and try again.')
-                else:
-                    with info:
-                        st.warning('Please provide valid credentials to proceed.')
-            else:
-                with info:
-                    st.warning('The provided username does not exist. Please sign up to create an account.')
+        if authentication_status is False and username is None:
+            with c:
+                st.error('Invalid username or password. Please check your credentials and try again.')
 
     except:
         st.success('Refresh Page')
