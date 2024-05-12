@@ -133,6 +133,7 @@ def production_page():
                     open_pdf_selected_orders()
                     insert_production_finished_rows()
                     find_quality_orders(db=connect_mongodb())
+
         else:
             st.write("No orders available for production yet.")
 
@@ -202,5 +203,6 @@ def production_page():
                     open_pdf_selected_orders()
                     insert_production_finished_rows()
                     find_quality_orders(db=connect_mongodb())
+
         else:
             st.write("No orders available for production yet.")
