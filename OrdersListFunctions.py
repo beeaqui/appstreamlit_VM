@@ -465,14 +465,14 @@ def create_pdf_selected_rows():
 
 
 def open_pdf_selected_orders():
-    pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
+    pdf_filename = "pdf_files/Selected_Orders_PDF.pdf"
 
     # Windows
     # print_b = subprocess.Popen(['C:\\Program Files\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe', '', pdf_filename])
     # Linux
     # print_b = subprocess.Popen(["/usr/bin/evince", pdf_filename])
 
-    print_b = webbrowser.open_new(r"pdf_files/Selected_Orders_PDF.pdf")
+    print_b = webbrowser.open(r"pdf_files/Selected_Orders_PDF.pdf")
 
     return print_b
 
