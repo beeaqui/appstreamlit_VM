@@ -19,16 +19,26 @@ keep_on_going_event = threading.Event()
 # Function to generate a random order
 def generate_random_order():
     Order.last_order_number += 1  # Increment the class attribute for the new order
+    number = Order.last_order_number  # Use the updated order number
+    reference = int("536297")
+
     product_delivery_date = datetime.datetime.now() + datetime.timedelta(minutes=random.randint(1, 120))
+    delivery_date = product_delivery_date.strftime('%H:%M') + ' h'
 
     current_date = datetime.datetime.now()
     time_gap = product_delivery_date - current_date
     gap = time_gap
 
-    number = Order.last_order_number  # Use the updated order number
-    reference = int("536297")
-    delivery_date = product_delivery_date.strftime('%H:%M') + 'h'
-    time_gap = str(gap) + 'h'
+    total_seconds = gap.total_seconds()
+
+    # Convert seconds to hours, minutes, and seconds
+    hours = int(total_seconds // 3600)
+    minutes = int((total_seconds % 3600) // 60)
+    # seconds = int(total_seconds % 60)
+
+    # Format the time_gap as "hours:minutes:seconds"
+    time_gap = f"{hours:02d}:{minutes:02d} h"
+
     description = random.choice(product_descriptions)
     model = random.choice(product_models)
     quantity = random.randint(1, 12)
