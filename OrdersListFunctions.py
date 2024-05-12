@@ -190,8 +190,8 @@ def create_grid():
     table_ids_selected = {}
     find_pre(order_df, table_ids_selected)
 
-    gd.configure_default_column(columns_auto_size_mode=True, cellStyle=cell_style, editable=True, groupable=True,
-                                resizable=True)
+    gd.configure_default_column(columns_auto_size_mode=True, cellStyle=cell_style, editable=False, groupable=True,
+                                resizable=True, width=180)
 
     gd.configure_selection(selection_mode="multiple", use_checkbox=True, pre_selected_rows=table_ids_selected)
 
