@@ -123,6 +123,7 @@ def find_pre(order_df, table_ids_selected):
     return table_ids_selected
 
 
+
 def create_grid():
     data = find_data_order()
 
@@ -138,8 +139,19 @@ def create_grid():
 
     gd = GridOptionsBuilder.from_dataframe(order_df)
 
-    param1 = 0.5
-    param2 = 1
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection16 = db['HighPriority']
+    collection17 = db['MediumPriority']
+
+    cursor1 = collection16.find()
+    cursor2 = collection17.find()
+
+    for document in cursor1:
+        param1 = document['High Priority']
+
+    for document in cursor2:
+        param2 = document["Medium Priority"]
 
     js_code = f"""
     function cell_style(params) {{

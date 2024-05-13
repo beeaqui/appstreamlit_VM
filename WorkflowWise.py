@@ -33,9 +33,9 @@ def website():
             credentials['usernames'][usernames[index]] = {'name': emails[index], 'password': passwords[index]}
 
         # Authenticate users using the provided credentials and create a session cookie
-        Authenticator = Authenticate(credentials, cookie_name='Streamlit', cookie_key='key', cookie_expiry_days=4)
+        authenticator = Authenticate(credentials, cookie_name='Streamlit', cookie_key='key', cookie_expiry_days=4)
 
-        email, authentication_status, username = Authenticator.login()
+        email, authentication_status, username = authenticator.login()
 
         c = st.container()
 
@@ -79,7 +79,7 @@ def website():
                             default_index=0)
 
                         # User is authenticated, display the main application interface
-                        Authenticator.logout('Log Out', 'sidebar')
+                        authenticator.logout('Log Out', 'sidebar')
 
                     if selected == "Supervisory Page":
                         supervisor_page()

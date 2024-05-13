@@ -69,6 +69,7 @@ def run():
         collection13 = db['CumulativeOrdersFinished']
         collection14 = db['PreSelectedOrders']
         collection15 = db['ValueGenerateOrders']
+        collection16 = db['HighPriority']
 
         print("Connected successfully")
         i = 0

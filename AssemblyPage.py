@@ -30,6 +30,3 @@ def assembly_page():
 
     elif option == "Mixed Connectors":
         mixed_connectors_operations()
-
-
-

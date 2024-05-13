@@ -1,6 +1,7 @@
 from OrdersListFunctions import update_timer
 from SupervisorFunctions import *
 import extra_streamlit_components as stx
+import datetime
 
 
 def conf1(configuration1):
@@ -14,18 +15,49 @@ def conf1(configuration1):
         collection15.drop()
         collection15.insert_one({'Time Interval Generate Order': configuration1})
 
-        cursor = collection15.find()
-        # Print data
-        for document in cursor:
-            print("Conf count nao 0 ", document)
-
     else:
         configuration_default = 30
         collection15.insert_one({'Time Interval Generate Order': configuration_default})
-        cursor = collection15.find()
-        # Print data
-        for document in cursor:
-            print("Conf count=0 ", document)
+
+
+def conf2(configuration2):
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection16 = db['HighPriority']
+
+    high_priority = configuration2
+
+    hours = high_priority.hour + high_priority.minute / 60
+
+    count1 = collection16.count_documents({})
+
+    if count1 != 0:
+        collection16.drop()
+        collection16.insert_one({'High Priority': hours})
+
+    else:
+        configuration_default = 0.5
+        collection16.insert_one({'High Priority': configuration_default})
+
+
+def conf3(configuration3):
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection17 = db['MediumPriority']
+
+    medium_priority = configuration3
+
+    hours = medium_priority.hour + medium_priority.minute / 60
+
+    count2 = collection17.count_documents({})
+
+    if count2 != 0:
+        collection17.drop()
+        collection17.insert_one({'Medium Priority': hours})
+
+    else:
+        configuration_default = 1.0
+        collection17.insert_one({'Medium Priority': configuration_default})
 
 
 def supervisor_page():
@@ -52,14 +84,21 @@ def supervisor_page():
                 be accurate with the reality.'''
             )
 
-        configuration1 = st.number_input(":blue[Insert how much time (in seconds) between orders generation]",
-                                        value=30, placeholder="Seconds...")
+        st.caption("")
 
-        st.write("The current number is ", configuration1)
-
-        print("\n mudado", configuration1)
-
+        configuration1 = st.number_input(":blue[Insert the time (in seconds) for the interval of orders generation:]",
+                                         value=30, placeholder="Seconds...")
         conf1(configuration1)
+
+        st.caption("")
+
+        configuration2 = st.time_input(":blue[High priority orders value (HH-MM):]", value=datetime.time(0, 30))
+        conf2(configuration2)
+
+        st.caption("")
+
+        configuration3 = st.time_input(":blue[Medium priority orders value (HH-MM):]", value=datetime.time(1, 0))
+        conf3(configuration3)
 
     if chosen_id == "2":
         st.subheader("Evolutionary Analysis of the Game")
