@@ -11,7 +11,7 @@ import plotly.express as px
 from ortools.linear_solver import pywraplp
 
 
-def solution(coefficients, x_coefficients, y_coefficients, objective_coefficients, vertices_polygon, signs):
+def solution(coefficients, x_coefficients, y_coefficients, objective_coefficients, vertices_polygon, signs, width6):
     m = GEKKO(remote=False)
     x, y = m.Array(m.Var, 2, lb=0)
 
@@ -93,7 +93,7 @@ def solution(coefficients, x_coefficients, y_coefficients, objective_coefficient
                                  title_font=dict(color='black'),
                                  tickfont=dict(color='black')),
                       showlegend=False,
-                      width=420,
+                      width=width6,
                       title='Linear Programming Problem',
                       height=420,
                       )
@@ -144,7 +144,7 @@ def find_intersections(coefficients, x_coefficients, y_coefficients):
     return vertices_polygon
 
 
-def LinearProgrammingExample(coefficients, x_coefficients, y_coefficients, signs, objective_coefficients):
+def LinearProgrammingExample(coefficients, x_coefficients, y_coefficients, signs, objective_coefficients, width6):
     solver = pywraplp.Solver.CreateSolver("GLOP")
     if not solver:
         return
@@ -192,7 +192,8 @@ def LinearProgrammingExample(coefficients, x_coefficients, y_coefficients, signs
         # print(f"Problem solved in {solver.iterations():d} iterations")
 
         vertices_polygon = find_intersections(coefficients, x_coefficients, y_coefficients)
-        solution(coefficients, x_coefficients, y_coefficients, objective_coefficients, vertices_polygon, signs)
+
+        solution(coefficients, x_coefficients, y_coefficients, objective_coefficients, vertices_polygon, signs, width6)
 
     else:
         print("The problem does not have an optimal solution.")
@@ -270,7 +271,7 @@ def trajectory(db):
     return standard_coordinates, sensor_kit_coordinates
 
 
-def plot_generated_orders():
+def plot_generated_orders(width1):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection8 = db['GenerateOrderTime']
@@ -313,7 +314,7 @@ def plot_generated_orders():
     #                   f'<b>Time Range:</b> from {first_time} to {last_time} hours')
 
     fig.update_layout(
-        width=320,
+        width=width1,
         xaxis=dict(tickfont=dict(color='black'), title=dict(text='Time (seconds)', font_color='black')),
         yaxis=dict(tickfont=dict(color='black'), title=dict(text='Customer Orders', font_color='black')),
     )
@@ -321,7 +322,7 @@ def plot_generated_orders():
     st.plotly_chart(fig)
 
 
-def wip_plot():
+def wip_plot(width2):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection9 = db['TimeOrderReleased']
@@ -459,7 +460,7 @@ def wip_plot():
         ),
         title='Cumulative Order Progress',
         hovermode='closest',
-        width=350,
+        width=width2,
         legend=dict(x=0.5, y=1.2, traceorder='normal', orientation='v'),
     )
 
@@ -530,7 +531,7 @@ def leadtime_calculate():
     return result
 
 
-def leadtime():
+def leadtime(width4):
     client = MongoClient("mongodb://localhost:27017/")
     db = client["local"]
     collection12 = db["LeadTimeOrders"]
@@ -553,13 +554,13 @@ def leadtime():
         xaxis=dict(title='Lead Time (seconds)', title_font=dict(color='black'), tickfont=dict(color='black'), ),
         yaxis=dict(title='Order Number', title_font=dict(color='black'), tickfont=dict(color='black'), ),
         bargap=0.15,
-        width=350)
+        width=width4)
 
     # Display the chart using Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
 
-def quality_distribution():
+def quality_distribution(width3):
     client = MongoClient("mongodb://localhost:27017/")
     db = client["local"]
     collection4 = "qualityApproved"
@@ -587,14 +588,14 @@ def quality_distribution():
         title='Quality Distribution',
         xaxis=dict(title='Quantity', title_font=dict(color='black'), tickfont=dict(color='black')),
         yaxis=dict(title='Quality', title_font=dict(color='black'), tickfont=dict(color='black')),
-        width=320,
+        width=width3,
         showlegend=False
     )
 
     st.plotly_chart(fig)
 
 
-def orders_distribution():
+def orders_distribution(width5):
     client = MongoClient("mongodb://localhost:27017/")
     db = client["local"]
 
@@ -621,7 +622,8 @@ def orders_distribution():
     fig.update_layout(
         xaxis=dict(title_font=dict(color='black'), tickfont=dict(color='black'), ),
         yaxis=dict(title_font=dict(color='black'), tickfont=dict(color='black'), ),
-        width=320,
+        width=width5,
         showlegend=False)
 
     st.plotly_chart(fig)
+

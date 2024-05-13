@@ -68,6 +68,7 @@ def run():
         collection12 = db['LeadTimeOrders']
         collection13 = db['CumulativeOrdersFinished']
         collection14 = db['PreSelectedOrders']
+        collection15 = db['ValueGenerateOrders']
 
         print("Connected successfully")
         i = 0
@@ -110,7 +111,13 @@ def run():
             print("Generated new Order with Id - ", i)
 
             i += 1
-            sleep(random.randint(1, 30))
+            cursor = collection15.find()
+            time_interval = 1
+            for document in cursor:
+                value = int(document['Time Interval Generate Order'])
+                time_interval = int(value)
+
+            sleep(random.randint(1, time_interval))
         keep_on_going = True
 
     except:

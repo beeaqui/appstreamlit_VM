@@ -15,8 +15,6 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image
 from reportlab.lib import colors
 from streamlit.components.v1 import html
 
-from streamlit_autorefresh import st_autorefresh
-
 
 def insert_selected_rows(selected_rows):
     client = MongoClient("mongodb://localhost:27017/")
@@ -140,52 +138,54 @@ def create_grid():
 
     gd = GridOptionsBuilder.from_dataframe(order_df)
 
-    cell_style = JsCode("""
-            function(params) {
-                console.log(params.data);
+    param1 = 0.5
+    param2 = 1
 
-                // Check if time_gap is defined before attempting to split
-                var timeGapParts;
-                console.log("params.data['Time Gap']", params.data['Time Gap']);
-                if (params.data['Time Gap']) {
-                    timeGapParts = params.data['Time Gap'].split(":");
-                } else {
-                    // Handle the case where time_gap is undefined (e.g., set a default value)
-                    timeGapParts = [0, 0, 0];
-                }
-
-                console.log('timeGapParts:', timeGapParts);  // Add this line to check the content of timeGapParts
-
-                // Ensure timeGapParts has at least three elements (hours, minutes, seconds)
-                while (timeGapParts.length < 3) {
-                    timeGapParts.push(0);
-                }
-
-                // Convert time_gap string to hours
-                var hours = parseInt(timeGapParts[0]);
-                var minutes = parseInt(timeGapParts[1]);
-                var seconds = parseInt(String(timeGapParts[2]).replace('h', ''));
-
-                console.log('hours:', hours);  // Add this line to check the value of hours
-                console.log('minutes:', minutes);  // Add this line to check the value of minutes
-                console.log('seconds:', seconds);  // Add this line to check the value of seconds
-
-                var totalHours = hours + minutes / 60 + seconds / 3600;
-
-                console.log('totalHours:', totalHours);  // Add this line to check the value of totalHours
-
-
-                // Adjusted logic for background color
-                var backgroundColor = totalHours < 0.5 ? 'rgb(213, 96, 98)' : (totalHours < 1 ? 
-                'rgb(244, 211, 94)' : 'white');
-
-                return {
-                    'color': 'black',
-                    'backgroundColor': backgroundColor,
-                    'textAlign': 'center'
-                };
-            }
-        """)
+    js_code = f"""
+    function cell_style(params) {{
+        console.log(params.data);
+    
+        // Check if time_gap is defined before attempting to split
+        var timeGapParts;
+        console.log("params.data['Time Gap']", params.data['Time Gap']);
+        if (params.data['Time Gap']) {{
+            timeGapParts = params.data['Time Gap'].split(":");
+        }} else {{
+            // Handle the case where time_gap is undefined (e.g., set a default value)
+            timeGapParts = [0, 0, 0];
+        }}
+    
+        console.log('timeGapParts:', timeGapParts);  // Add this line to check the content of timeGapParts
+    
+        // Ensure timeGapParts has at least three elements (hours, minutes, seconds)
+        while (timeGapParts.length < 3) {{
+            timeGapParts.push(0);
+        }}
+    
+        // Convert time_gap string to hours
+        var hours = parseInt(timeGapParts[0]);
+        var minutes = parseInt(timeGapParts[1]);
+        var seconds = parseInt(String(timeGapParts[2]).replace('h', ''));
+    
+        console.log('hours:', hours);  // Add this line to check the value of hours
+        console.log('minutes:', minutes);  // Add this line to check the value of minutes
+        console.log('seconds:', seconds);  // Add this line to check the value of seconds
+    
+        var totalHours = hours + minutes / 60 + seconds / 3600;
+    
+        console.log('totalHours:', totalHours);  // Add this line to check the value of totalHours
+    
+        // Adjusted logic for background color
+        var backgroundColor = totalHours < {param1} ? 'rgb(213, 96, 98)' : (totalHours < {param2} ? 'rgb(244, 211, 94)' : 'white');
+    
+        return {{
+            'color': 'black',
+            'backgroundColor': backgroundColor,
+            'textAlign': 'center'
+        }};
+    }}
+    """
+    cell_style = JsCode(js_code)
 
     table_ids_selected = {}
     find_pre(order_df, table_ids_selected)
