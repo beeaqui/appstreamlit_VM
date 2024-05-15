@@ -485,14 +485,7 @@ def open_pdf_selected_orders():
     # Linux
     # print_b = subprocess.Popen(["/usr/bin/evince", pdf_filename])
 
-    #webbrowser.open(r"pdf_files/Selected_Orders_PDF.pdf")
-    with open("pdf_files/Selected_Orders_PDF.pdf", "rb") as file:
-        btn = st.download_button(
-            label="Print",
-            data=file,
-            file_name="pdf_files/Selected_Orders_PDF.pdf"
-
-        )
+    webbrowser.open(r"pdf_files/Selected_Orders_PDF.pdf")
     #st_pdf.pdf_viewer(input="pdf_files/Selected_Orders_PDF.pdf", width=15000)
     return None
 
