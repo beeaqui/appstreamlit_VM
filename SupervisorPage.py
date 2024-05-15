@@ -1,5 +1,8 @@
-from SupervisorFunctions import *
 import extra_streamlit_components as stx
+from streamlit_autorefresh import st_autorefresh
+
+from OrderThread import *
+from SupervisorFunctions import *
 import datetime
 
 
@@ -77,6 +80,31 @@ def supervisor_page():
 
     if chosen_id == "1":
         st.subheader("Game Configurations")
+
+        c1, c2, c3, c4 = st.columns(4)
+        with c2:
+            create_orders_button = st.button('Start Game', key='create_orders', type='primary',
+                                             help='Start Generating Orders.',
+                                             use_container_width=True)
+
+        with c3:
+            stop_orders_button = st.button('Stop Game', key='stop_orders_button', type='primary',
+                                           help='Stop Generating Orders.',
+                                           use_container_width=True)
+
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client['local']
+        collection1 = db['ordersCollection']
+
+        if create_orders_button:
+            collection1.drop()
+            start_thread()
+
+        st_autorefresh(limit=50, interval=10000, key="aaaa", debounce=False)
+
+        if stop_orders_button:
+            semaphore()
+
         with st.expander("Quick note:", expanded=True):
             st.markdown(
                 '''\n Here you can set some configurations that will define the game. Select the values for them to 
@@ -84,7 +112,6 @@ def supervisor_page():
             )
 
         st.caption("")
-
         configuration1 = st.number_input(":blue[Insert the time (in seconds) for the interval of orders generation:]",
                                          value=30, placeholder="Seconds...")
         conf1(configuration1)

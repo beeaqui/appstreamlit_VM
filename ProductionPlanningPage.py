@@ -1,9 +1,6 @@
 from OrdersListFunctions import *
 from QualityControlFunctions import *
 from ExpeditionFunctions import *
-from OrderThread import *
-
-from streamlit_autorefresh import st_autorefresh
 
 
 def production_page():
@@ -27,29 +24,9 @@ def production_page():
         )
     st.caption("")
 
-    o1, o2 = st.columns(2)
-    with o1:
-        create_orders_button = st.button('Start Game', key='create_orders', type='primary',
-                                         help='Start Generating Orders.',
-                                         use_container_width=True)
-
-    with o2:
-        stop_orders_button = st.button('Stop Game', key='stop_orders_button', type='primary',
-                                       help='Stop Generating Orders.',
-                                       use_container_width=True)
-
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection1 = db['ordersCollection']
-
-    if create_orders_button:
-        collection1.drop()
-        start_thread()
-
-    st_autorefresh(limit=50, interval=10000, key="aaaa", debounce=False)
-
-    if stop_orders_button:
-        semaphore()
 
     count1 = collection1.count_documents({})
 
