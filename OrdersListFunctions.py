@@ -1,20 +1,22 @@
 import os
-import webbrowser
-
 import streamlit as st
 import pandas as pd
-import subprocess
 from datetime import datetime
-import streamlit_pdf_viewer as st_pdf
-
 from pymongo import MongoClient
+
 from st_aggrid import GridUpdateMode, AgGrid, JsCode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
+from streamlit.components.v1 import html
 
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image
 from reportlab.lib import colors
-from streamlit.components.v1 import html
+
+
+# Not used, code in comments
+# import subprocess
+# import webbrowser
+# import streamlit_pdf_viewer as st_pdf
 
 
 def insert_selected_rows(selected_rows):
@@ -122,7 +124,6 @@ def find_pre(order_df, table_ids_selected):
                 table_ids_selected[str(position)] = True
 
     return table_ids_selected
-
 
 
 def create_grid():
@@ -485,16 +486,17 @@ def open_pdf_selected_orders():
     # Linux
     # print_b = subprocess.Popen(["/usr/bin/evince", pdf_filename])
 
+    # Uncomment if necessary to open directly the PDF file
+    # st_pdf.pdf_viewer(input="pdf_files/Selected_Orders_PDF.pdf", width=15000)
     # webbrowser.open(r"pdf_files/Selected_Orders_PDF.pdf")
+
     with open("pdf_files/Selected_Orders_PDF.pdf", "rb") as file:
         btn = st.download_button(
-            label="Print",
+            label="Download",
             data=file,
-            file_name="pdf_files/Selected_Orders_PDF.pdf"
-
+            file_name="Production_Order.pdf"
         )
-    # st_pdf.pdf_viewer(input="pdf_files/Selected_Orders_PDF.pdf", width=15000)
-    return None
+    return btn
 
 
 def insert_production_finished_rows():

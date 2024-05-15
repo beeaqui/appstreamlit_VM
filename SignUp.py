@@ -5,7 +5,6 @@ import datetime
 import re
 from streamlit_authenticator.utilities.hasher import Hasher
 
-
 # Connect to MongoDB database
 client = MongoClient("mongodb://localhost:27017/")
 db = client['local']
@@ -56,7 +55,7 @@ def get_usernames():
 
 # Function to validate email format
 def validate_email(email):
-    pattern = '^[a-zA-Z0-9_]+@[a-zA-Z0-9]+\.[a-z.]{1,}$'
+    pattern = '^[a-zA-Z0-9_]+@[a-zA-Z0-9-]+\.[a-zA-Z.]+$'
 
     if re.match(pattern, email):
         return True

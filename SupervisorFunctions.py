@@ -626,4 +626,3 @@ def orders_distribution(width5):
         showlegend=False)
 
     st.plotly_chart(fig)
-

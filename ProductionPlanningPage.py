@@ -117,20 +117,10 @@ def production_page():
             create_pdf_selected_rows()
 
             col1, col2, col3, col4, col5 = st.columns(5)
-
-            # with col2:
-            #    # Stream the PDF file to the user
-            #    st.download_button(label="Download PDF", data=pdf_bytes,
-            #                        file_name="Selected_Orders_PDF.pdf", mime="application/pdf")
-
             with col1:
-                # Button to generate and print PDF
-                if st.button("Print PDF"):
-                    # Generate PDF and get the file path
-                    pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
-
-                    # Call the print_pdf function to open the PDF file
-                    open_pdf_selected_orders()
+                # pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
+                btn = open_pdf_selected_orders()
+                if btn:
                     insert_production_finished_rows()
                     find_quality_orders(db=connect_mongodb())
 
@@ -187,21 +177,12 @@ def production_page():
             create_pdf_selected_rows()
 
             col1, col2, col3, col4, col5 = st.columns(5)
-
-            # with col2:
-            #    # Stream the PDF file to the user
-            #    st.download_button(label="Download PDF", data=pdf_bytes,
-            #                        file_name="Selected_Orders_PDF.pdf", mime="application/pdf")
-
             with col1:
-                # Button to generate and print PDF
-                #if st.button("Print PDF"):
-                    # Generate PDF and get the file path
-                pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
-
-                open_pdf_selected_orders()
-                    #insert_production_finished_rows()
-                    #find_quality_orders(db=connect_mongodb())
+                # pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
+                btn = open_pdf_selected_orders()
+                if btn:
+                    insert_production_finished_rows()
+                    find_quality_orders(db=connect_mongodb())
 
         else:
             st.write("No orders available for production yet.")

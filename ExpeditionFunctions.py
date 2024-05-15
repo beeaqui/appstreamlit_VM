@@ -78,7 +78,7 @@ def display_tables_expedition():
 
                 c1, c2, c3 = st.columns(3)
                 with c2:
-                    confirm = st.button('Dispatched', key=f'{expedition_order}', type='primary')
+                    confirm = st.button('Dispatch', key=f'{expedition_order}', type='primary')
                     if confirm:
                         concluded_orders(db, expedition_order)
                         insert_confirmation_data(expedition_order['Number'])
