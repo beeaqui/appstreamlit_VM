@@ -88,6 +88,7 @@ def run():
         collection13.drop()
         collection14.drop()
 
+
         while not keep_on_going_event.is_set():
             order = generate_random_order()
 

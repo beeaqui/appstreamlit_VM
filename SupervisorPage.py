@@ -82,6 +82,33 @@ def supervisor_page():
         st.subheader("Game Configurations")
 
         c1, c2, c3, c4 = st.columns(4)
+        with c4:
+            clear_game = st.button('CLEAR ALL', key='clear_game', type='primary',
+                                   help='Clear all data of the game.',
+                                   use_container_width=True)
+            if clear_game:
+                client = MongoClient("mongodb://localhost:27017/")
+                db = client['local']
+                
+                db['ordersCollection'].drop()
+                db['ordersCollection'].drop()
+                db['selectedOrders'].drop()
+                db['qualityOrders'].drop()
+                db['qualityApproved'].drop()
+                db['qualityDisapproved'].drop()
+                db['expeditionOrders'].drop()
+                db['ordersConcluded'].drop()
+                db['GenerateOrderTime'].drop()
+                db['TimeOrderReleased'].drop()
+                db['TimeProductionFinished'].drop()
+                db['TimeExpeditionEnd'].drop()
+                db['LeadTimeOrders'].drop()
+                db['CumulativeOrdersFinished'].drop()
+                db['PreSelectedOrders'].drop()
+                db['ValueGenerateOrders'].drop()
+                db['HighPriority'].drop()
+
+        c1, c2, c3, c4 = st.columns(4)
         with c2:
             create_orders_button = st.button('Start Game', key='create_orders', type='primary',
                                              help='Start Generating Orders.',
