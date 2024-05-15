@@ -7,7 +7,6 @@ import threading
 from pymongo import MongoClient
 from Order import *
 
-
 # Lists of product descriptions, models, and colors
 product_descriptions = ["Pneumatic Cylinder ADN-40-60-A-P-A"]
 product_models = ["Standard", "Sensor Kit"]

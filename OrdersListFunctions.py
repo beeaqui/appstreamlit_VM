@@ -5,6 +5,7 @@ import streamlit as st
 import pandas as pd
 import subprocess
 from datetime import datetime
+import streamlit_pdf_viewer as st_pdf
 
 from pymongo import MongoClient
 from st_aggrid import GridUpdateMode, AgGrid, JsCode
@@ -484,9 +485,9 @@ def open_pdf_selected_orders():
     # Linux
     # print_b = subprocess.Popen(["/usr/bin/evince", pdf_filename])
 
-    print_b = webbrowser.open(r"pdf_files/Selected_Orders_PDF.pdf")
-
-    return print_b
+    webbrowser.open(r"pdf_files/Selected_Orders_PDF.pdf")
+    #st_pdf.pdf_viewer(input="pdf_files/Selected_Orders_PDF.pdf", width=15000)
+    return None
 
 
 def insert_production_finished_rows():

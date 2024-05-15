@@ -195,14 +195,13 @@ def production_page():
 
             with col1:
                 # Button to generate and print PDF
-                if st.button("Print PDF"):
+                #if st.button("Print PDF"):
                     # Generate PDF and get the file path
-                    pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
+                pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
 
-                    # Call the print_pdf function to open the PDF file
-                    open_pdf_selected_orders()
-                    insert_production_finished_rows()
-                    find_quality_orders(db=connect_mongodb())
+                open_pdf_selected_orders()
+                    #insert_production_finished_rows()
+                    #find_quality_orders(db=connect_mongodb())
 
         else:
             st.write("No orders available for production yet.")
