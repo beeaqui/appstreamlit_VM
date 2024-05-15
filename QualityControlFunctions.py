@@ -111,7 +111,7 @@ def quality_checks():
                 c1, c2 = st.columns(2)
                 with c1:
 
-                    approve = st.button('Approved', key=f"button_approve{quality_order['Number']}",
+                    approve = st.button('Approve', key=f"button_approve{quality_order['Number']}",
                                         use_container_width=True)
                     st.markdown(
                         """
@@ -173,7 +173,7 @@ def quality_checks():
                         st_autorefresh(limit=2, key=f"approve{quality_order['Number']}")
 
                 with c2:
-                    disapprove = st.button('Disapproved', key=f"button_disapprove{quality_order['Number']}")
+                    disapprove = st.button('Disapprove', key=f"button_disapprove{quality_order['Number']}")
                     st.markdown(
                         """
                         <style>

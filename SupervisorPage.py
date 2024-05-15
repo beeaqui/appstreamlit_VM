@@ -1,4 +1,3 @@
-from OrdersListFunctions import update_timer
 from SupervisorFunctions import *
 import extra_streamlit_components as stx
 import datetime
@@ -65,7 +64,7 @@ def supervisor_page():
 
     tab_bar_data = [
         stx.TabBarItemData(id=1, title="Game Configurations", description=" "),
-        stx.TabBarItemData(id=2, title="Evolutionary Analysis", description=" "),
+        stx.TabBarItemData(id=2, title="Game Analysis", description=" "),
         stx.TabBarItemData(id=3, title="Order Generation Status", description=" "),
         stx.TabBarItemData(id=4, title="Cumulative Order Progress", description=" "),
         stx.TabBarItemData(id=5, title="Quality Distribution", description=" "),
@@ -101,7 +100,7 @@ def supervisor_page():
         conf3(configuration3)
 
     if chosen_id == "2":
-        st.subheader("Evolutionary Analysis of the Game")
+        st.subheader("Game Analysis")
         with st.expander("Quick note:", expanded=True):
             st.markdown(
                 '''\n This analysis provides important information related  various metrics for an evolutionary 
