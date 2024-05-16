@@ -88,7 +88,6 @@ def run():
         collection13.drop()
         collection14.drop()
 
-
         while not keep_on_going_event.is_set():
             order = generate_random_order()
 
@@ -128,6 +127,7 @@ def run():
 
 def semaphore():
     print("Semaphore called.")
+
     keep_on_going_event.set()
 
 
@@ -135,4 +135,5 @@ def start_thread():
     print("Starting thread...")
     keep_on_going_event.clear()
     thread_create_orders = threading.Thread(target=run)
+    Order.last_order_number = 0
     thread_create_orders.start()

@@ -41,7 +41,7 @@ def production_page():
 
         with col3:
             submit_button = st.button('Order Release', key='selected_rows_button', type='primary',
-                                      help='Submit customer order for production.',
+                                      help='Submit customer orders for production.',
                                       use_container_width=True)
             if submit_button:
 
