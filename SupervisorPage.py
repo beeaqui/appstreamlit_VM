@@ -127,8 +127,6 @@ def supervisor_page():
             collection1.drop()
             start_thread()
 
-        st_autorefresh(limit=50, interval=10000, key="aaaa", debounce=False)
-
         if stop_orders_button:
             semaphore()
 

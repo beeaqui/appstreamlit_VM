@@ -35,6 +35,7 @@ def production_page():
         grid_container = create_grid()
         selected_rows = grid_container["selected_rows"]
         insert_pre(selected_rows)
+        st_autorefresh(limit=50, interval=10000, key="aaaa", debounce=False)
 
         col1, col2, col3 = st.columns(3)
 

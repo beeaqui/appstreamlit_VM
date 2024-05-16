@@ -55,7 +55,7 @@ def get_usernames():
 
 # Function to validate email format
 def validate_email(email):
-    pattern = '^[a-zA-Z0-9_]+@[a-zA-Z0-9-]+\.[a-zA-Z.]+$'
+    pattern = '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
 
     if re.match(pattern, email):
         return True
@@ -76,7 +76,7 @@ def sign_up():
     with st.form(key='signup'):
         st.subheader(':gray98[Sign Up]')
 
-        email = st.text_input('Email', placeholder='Enter your Email')
+        email = st.text_input('Email', placeholder='Enter your Email', help='e.g.: example1@dem.uc.pt ')
 
         username = st.text_input('Username', placeholder='Enter your Username')
 
