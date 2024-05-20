@@ -6,7 +6,7 @@ class Order(object):
 
     # Constructor method to initialize the Order object with provided attributes
     def __init__(self, number, reference, delivery_date, time_gap, description, model, quantity, color, dimensions):
-        self.number = int(number)
+        self.number = number
         self.reference = reference
         self.delivery_date = delivery_date
         self.time_gap = time_gap

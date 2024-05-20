@@ -4,47 +4,64 @@ import datetime
 import random
 from time import sleep
 import threading
+import csv
 from pymongo import MongoClient
 from Order import *
-
-# Lists of product descriptions, models, and colors
-product_descriptions = ["Pneumatic Cylinder ADN-40-60-A-P-A"]
-product_models = ["Standard", "Sensor Kit"]
-product_colors = ['Grey Metal']
 
 keep_on_going_event = threading.Event()
 
 
-# Function to generate a random order
-def generate_random_order():
-    Order.last_order_number += 1  # Increment the class attribute for the new order
-    number = Order.last_order_number  # Use the updated order number
-    reference = int("536297")
+def read_orders_from_csv():
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection18 = db['GamePhaseConfig']
+    cursor = collection18.find()
 
-    product_delivery_date = datetime.datetime.now() + datetime.timedelta(minutes=random.randint(1, 120))
-    delivery_date = product_delivery_date.strftime('%H:%M') + ' h'
+    orders = []
+    for document in cursor:
+        if document['Game Phase'] == "Game 1":
+            with open('../appStreamlit/client_orders.csv', mode='r') as file:
+                csv_reader = csv.DictReader(file)
 
-    current_date = datetime.datetime.now()
-    time_gap = product_delivery_date - current_date
-    gap = time_gap
+                for row in csv_reader:
+                    orders.append(Order(
+                        str(row['number']),
+                        int(row['reference']),
+                        row['delivery_date'],
+                        row['time_gap'],
+                        row['description'],
+                        row['model'],
+                        int(row['quantity']),
+                        row['color'],
+                        row['dimensions']
+                    ))
+                if not orders:
+                    return None
 
-    total_seconds = gap.total_seconds()
+        elif document['Game Phase'] == "Game 2":
+            with open('../appStreamlit/client_orders.csv', mode='r') as file:
+                csv_reader = csv.DictReader(file)
 
-    # Convert seconds to hours, minutes, and seconds
-    hours = int(total_seconds // 3600)
-    minutes = int((total_seconds % 3600) // 60)
-    # seconds = int(total_seconds % 60)
+                for row in csv_reader:
+                    i = 0
+                    for i in range(int(row['quantity'])):
+                        picker = str(i + 1)
+                        orders.append(Order(
+                            str(picker + '/' + row['quantity']),
+                            int(row['reference']),
+                            row['delivery_date'],
+                            row['time_gap'],
+                            row['description'],
+                            row['model'],
+                            int(1),  # quantity
+                            row['color'],
+                            row['dimensions']
+                        ))
 
-    # Format the time_gap as "hours:minutes:seconds"
-    time_gap = f"{hours:02d}:{minutes:02d} h"
+        else:
+            return None
 
-    description = random.choice(product_descriptions)
-    model = random.choice(product_models)
-    quantity = random.randint(1, 12)
-    color = random.choice(product_colors)
-    dimensions = f"13.01 x 5.45 x 5.45 cm"
-
-    return Order(number, reference, delivery_date, time_gap, description, model, quantity, color, dimensions)
+        return orders
 
 
 # Main function to run the program
@@ -69,6 +86,8 @@ def run():
         collection14 = db['PreSelectedOrders']
         collection15 = db['ValueGenerateOrders']
         collection16 = db['HighPriority']
+        collection17 = db['MediumPriority']
+        collection18 = db['GamePhaseConfig']
 
         print("Connected successfully")
         i = 0
@@ -88,29 +107,52 @@ def run():
         collection13.drop()
         collection14.drop()
 
+        order = read_orders_from_csv()
+        row_count = 0
+
+        if order is None:
+            return
+
         while not keep_on_going_event.is_set():
-            order = generate_random_order()
+            if row_count >= len(order)-1:
+                semaphore()
 
-            collection.insert_one(
-                {'number': order.number, 'reference': order.reference, 'delivery_date': order.delivery_date,
-                 'time_gap': order.time_gap, 'description': order.description, 'model': order.model,
-                 'quantity': order.quantity, 'color': order.color, 'dimensions': order.dimensions})
+            aux_count = row_count
+            addition = 1
 
-            cust_order_datetime = datetime.datetime.now()
-            date_cust_order = cust_order_datetime.date().strftime('%Y-%m-%d')
-            time_cust_order = cust_order_datetime.time().strftime('%H:%M:%S')
+            for aux_count in range(aux_count, len(order)):
+                collection.insert_one(
+                    {'number': order[aux_count].number, 'reference': order[aux_count].reference,
+                     'delivery_date': order[aux_count].delivery_date,
+                     'time_gap': order[aux_count].time_gap, 'description': order[aux_count].description,
+                     'model': order[aux_count].model,
+                     'quantity': order[aux_count].quantity, 'color': order[aux_count].color,
+                     'dimensions': order[aux_count].dimensions})
 
-            collection8.insert_one({
-                'Order Number': order.number,
-                'Generated Cust_Order': {
-                    'Date': date_cust_order,
-                    'Time': time_cust_order
-                }
-            })
+                cust_order_datetime = datetime.datetime.now()
+                date_cust_order = cust_order_datetime.date().strftime('%Y-%m-%d')
+                time_cust_order = cust_order_datetime.time().strftime('%H:%M:%S')
 
-            print("Generated new Order with Id - ", i)
+                collection8.insert_one({
+                    'Order Number': order[aux_count].number,
+                    'Generated Cust_Order': {
+                        'Date': date_cust_order,
+                        'Time': time_cust_order
+                    }
+                })
+
+                print("Generated new Order with Id - ", i)
+
+                if aux_count + 1 > len(order)-1:
+                    semaphore()
+                if order[aux_count].reference != order[aux_count + 1].reference:
+                    break
+
+                addition += 1
 
             i += 1
+            row_count += addition
+
             cursor = collection15.find()
             time_interval = 1
             for document in cursor:
@@ -121,14 +163,13 @@ def run():
         keep_on_going = True
 
     except:
-        print("Could not connect to MongoDB")
-    print("Thread stopped.")
+        print("Exception: out of thread.")
 
 
 def semaphore():
     print("Semaphore called.")
-
     keep_on_going_event.set()
+    print("Thread stopped.")
 
 
 def start_thread():

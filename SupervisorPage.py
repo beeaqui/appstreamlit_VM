@@ -1,9 +1,27 @@
 import extra_streamlit_components as stx
+import streamlit
 from streamlit_autorefresh import st_autorefresh
 
 from OrderThread import *
 from SupervisorFunctions import *
 import datetime
+
+
+def game_conf(game_option):
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection18 = db['GamePhaseConfig']
+
+    count1 = collection18.count_documents({})
+
+    if count1 != 0:
+        collection18.drop()
+        collection18.insert_one({'Game Phase': game_option})
+
+    else:
+        collection18.drop()
+        configuration_default = None
+        collection18.insert_one({'Game Phase': configuration_default})
 
 
 def conf1(configuration1):
@@ -81,15 +99,21 @@ def supervisor_page():
     if chosen_id == "1":
         st.subheader("Game Configurations")
 
+        game_option = st.selectbox(label=':blue[Select the game phase in order to proceed]',
+                                   options=("Game 1", "Game 2"), key='game_options', index=None,
+                                   placeholder="Choose the game phase")
+        game_conf(game_option)
+
         c1, c2, c3, c4 = st.columns(4)
         with c4:
-            clear_game = st.button('CLEAR ALL', key='clear_game', type='primary',
-                                   help='Clear all data of the game.',
+            clear_game = st.button('Clear Game', key='clear_game', type='secondary',
+                                   help='Clear all data of the current game',
                                    use_container_width=True)
             if clear_game:
                 client = MongoClient("mongodb://localhost:27017/")
                 db = client['local']
-                
+                semaphore()
+
                 db['ordersCollection'].drop()
                 db['ordersCollection'].drop()
                 db['selectedOrders'].drop()
@@ -111,12 +135,12 @@ def supervisor_page():
         c1, c2, c3, c4 = st.columns(4)
         with c2:
             create_orders_button = st.button('Start Game', key='create_orders', type='primary',
-                                             help='Start Generating Orders.',
+                                             help='Start Generating Orders',
                                              use_container_width=True)
 
         with c3:
             stop_orders_button = st.button('Stop Game', key='stop_orders_button', type='primary',
-                                           help='Stop Generating Orders.',
+                                           help='Stop Generating Orders',
                                            use_container_width=True)
 
         client = MongoClient("mongodb://localhost:27017/")
@@ -159,6 +183,7 @@ def supervisor_page():
                 analysis of the production line. \n Pay attention and discuss it with your teammates.'''
             )
         c1, c2 = st.columns(2)
+
         with c1:
             width1 = 320
             plot_generated_orders(width1)
