@@ -17,9 +17,9 @@ def connect_mongodb():
 def find_expedition_orders(db):
     collection6 = db['expeditionOrders']
 
-    expedition_orders = collection6.find({}, {'_id': 0, 'Number': 1, 'Reference': 1, 'Delivery Date': 1,
-                                              'Time Gap': 1, 'Description': 1, 'Model': 1, 'Quantity': 1,
-                                              'Color': 1, 'Dimensions': 1})
+    expedition_orders = collection6.find({}, {'_id': 0, 'Production Order ID': 1, 'Number': 1, 'Reference': 1,
+                                              'Delivery Date': 1, 'Description': 1, 'Model': 1,
+                                              'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
     expedition_orders_list = list(expedition_orders)
 
@@ -35,7 +35,7 @@ def concluded_orders(db, order_number):
     collection7 = db['ordersConcluded']
 
     collection7.insert_one({'Number': order_number['Number'], 'Reference': order_number['Reference'],
-                            'Delivery Date': order_number['Delivery Date'], 'Time Gap': order_number['Time Gap'],
+                            'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})

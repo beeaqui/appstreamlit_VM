@@ -1,4 +1,21 @@
 number,reference,delivery_date,time_gap,description,model,quantity,color,dimensions
-1,536297,12:30 h,00:10 h,Pneumatic Cylinder ADN-40-60-A-P-A,Standard,5,Grey Metal,13.01 x 5.45 x 5.45 cm
-2,536298,14:00 h,01:00 h,Pneumatic Cylinder ADN-40-60-A-P-A,Sensor Kit,8,Grey Metal,13.01 x 5.45 x 5.45 cm
-3,536299,16:00 h,01:30 h,Pneumatic Cylinder ADN-40-60-A-P-A,Standard,3,Grey Metal,13.01 x 5.45 x 5.45 cm
+1,536300,12:01 h,00:35 h,Pneumatic ADN-40-60-A-P-A,L-Fit Cylinder,3,Grey Metal,13.01 x 5.45 x 5.45 cm
+2,536301,13:07 h,01:41 h,Pneumatic ADN-40-60-A-P-A,Push-in Cylinder,2,Grey Metal,13.01 x 5.45 x 5.45 cm
+3,536302,13:18 h,01:52 h,Pneumatic ADN-40-60-A-P-A,Standard Cylinder,4,Grey Metal,13.01 x 5.45 x 5.45 cm
+4,536303,12:48 h,01:22 h,Pneumatic ADN-40-60-A-P-A,Push-in Cylinder,1,Grey Metal,13.01 x 5.45 x 5.45 cm
+5,536304,12:55 h,01:29 h,Pneumatic ADN-40-60-A-P-A,Dual-Fit Cylinder,2,Grey Metal,13.01 x 5.45 x 5.45 cm
+6,536305,11:34 h,00:08 h,Pneumatic ADN-40-60-A-P-A,Push-in Cylinder,3,Grey Metal,13.01 x 5.45 x 5.45 cm
+7,536306,11:42 h,00:16 h,Pneumatic ADN-40-60-A-P-A,Standard Cylinder,4,Grey Metal,13.01 x 5.45 x 5.45 cm
+8,536307,11:59 h,00:33 h,Pneumatic ADN-40-60-A-P-A,Dual-Fit Cylinder,1,Grey Metal,13.01 x 5.45 x 5.45 cm
+9,536308,13:19 h,01:53 h,Pneumatic ADN-40-60-A-P-A,Standard Cylinder,2,Grey Metal,13.01 x 5.45 x 5.45 cm
+10,536309,12:03 h,00:37 h,Pneumatic ADN-40-60-A-P-A,L-Fit Cylinder,3,Grey Metal,13.01 x 5.45 x 5.45 cm
+11,536310,13:10 h,01:44 h,Pneumatic ADN-40-60-A-P-A,Push-in Cylinder,4,Grey Metal,13.01 x 5.45 x 5.45 cm
+12,536311,12:16 h,00:50 h,Pneumatic ADN-40-60-A-P-A,Standard Cylinder,1,Grey Metal,13.01 x 5.45 x 5.45 cm
+13,536312,11:47 h,00:21 h,Pneumatic ADN-40-60-A-P-A,Dual-Fit Cylinder,2,Grey Metal,13.01 x 5.45 x 5.45 cm
+14,536313,12:46 h,01:20 h,Pneumatic ADN-40-60-A-P-A,Push-in Cylinder,3,Grey Metal,13.01 x 5.45 x 5.45 cm
+15,536314,11:56 h,00:30 h,Pneumatic ADN-40-60-A-P-A,Standard Cylinder,4,Grey Metal,13.01 x 5.45 x 5.45 cm
+16,536315,13:07 h,01:41 h,Pneumatic ADN-40-60-A-P-A,L-Fit Cylinder,1,Grey Metal,13.01 x 5.45 x 5.45 cm
+17,536316,12:44 h,01:18 h,Pneumatic ADN-40-60-A-P-A,Push-in Cylinder,2,Grey Metal,13.01 x 5.45 x 5.45 cm
+18,536317,12:32 h,01:06 h,Pneumatic ADN-40-60-A-P-A,Dual-Fit Cylinder,3,Grey Metal,13.01 x 5.45 x 5.45 cm
+19,536318,13:00 h,01:34 h,Pneumatic ADN-40-60-A-P-A,Standard Cylinder,4,Grey Metal,13.01 x 5.45 x 5.45 cm
+20,536319,11:49 h,00:23 h,Pneumatic ADN-40-60-A-P-A,Push-in Cylinder,1,Grey Metal,13.01 x 5.45 x 5.45 cm

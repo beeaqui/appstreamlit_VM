@@ -4,8 +4,9 @@ from QualityPage import *
 from ExpeditionPage import *
 from SupervisorPage import *
 from AssemblyPage import *
-from OtherPage import *
+from OptimizationPage import *
 from SignUp import sign_up, fetch_users, get_key
+from LogisticsPage import *
 
 from streamlit_option_menu import option_menu
 from streamlit_authenticator import Authenticate
@@ -49,20 +50,23 @@ def website():
                     permission = []
 
                     if session_key == 'Supervisor':
-                        permission = ["Supervisory Page", "Production Planning", 'Assembly Process',
-                                      "Quality Control", "Expedition", "Production Trajectory"]
+                        permission = ["Supervisory Page", "Production Planning", "Logistics Operator",
+                                      'Assembly Process', "Quality Control", "Expedition", "Production Trajectory"]
 
                     if session_key == 'Production Planning':
                         permission = ["Production Planning"]
+
+                    if session_key == 'Assembly Process':
+                        permission = ["Assembly Process"]
+
+                    if session_key == 'Logistics Operator':
+                        permission = ["Logistics Operator"]
 
                     if session_key == 'Quality Control':
                         permission = ["Quality Control"]
 
                     if session_key == 'Expedition':
                         permission = ["Expedition"]
-
-                    if session_key == 'Assembly Process':
-                        permission = ["Assembly Process"]
 
                     if session_key == 'Production Trajectory':
                         permission = ["Production Trajectory"]
@@ -89,6 +93,9 @@ def website():
 
                     if selected == "Assembly Process":
                         assembly_page()
+
+                    if selected == "Logistics Operator":
+                        logistics_page()
 
                     if selected == 'Quality Control':
                         quality_page()

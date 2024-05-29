@@ -12,11 +12,12 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image
 from reportlab.lib import colors
 
-
 # Not used, code in comments
 # import subprocess
 # import webbrowser
 # import streamlit_pdf_viewer as st_pdf
+
+release_id = 1
 
 
 def insert_selected_rows(selected_rows):
@@ -26,9 +27,77 @@ def insert_selected_rows(selected_rows):
 
     for row in selected_rows:
         selected_orders = collection2.insert_one(
-            {'Number': row['Number'], 'Reference': row['Reference'], 'Delivery Date': row['Delivery Date'],
-             'Time Gap': row['Time Gap'], 'Description': row['Description'], 'Model': row['Model'],
-             'Quantity': row['Quantity'], 'Color': row['Color'], 'Dimensions': row['Dimensions']})
+            {"Production Order ID": release_id, 'Number': row['Number'], 'Reference': row['Reference'],
+             'Delivery Date': row['Delivery Date'], 'Time Gap': row['Time Gap'],
+             'Description': row['Description'], 'Model': row['Model'], 'Quantity': row['Quantity'],
+             'Color': row['Color'], 'Dimensions': row['Dimensions']})
+
+
+def reset_release_id():
+    global release_id
+    release_id = 1
+
+
+def increment_release_id():
+    global release_id
+    release_id += 1
+
+
+def insert_logistics_orders(selected_rows):
+    global release_id
+
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection19 = db['LogisticsOrders']
+
+    for row in selected_rows:
+        if row['Model'] == "Standard Cylinder":
+            data = collection19.insert_one({"Production Order ID": row['Production Order ID'],
+                                            "Order Number": row['Number'],
+                                            "Quantity": row['Quantity'], "Model": row['Model'],
+                                            "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
+                                            "Quantity 3": 0,
+                                            "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
+                                            "Quantity 6": 0,
+                                            "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
+                                            "Quantity 9": row['Quantity'] * 2,
+                                            })
+
+        if row['Model'] == "Push-in Cylinder":
+            data = collection19.insert_one({"Production Order ID": row['Production Order ID'],
+                                            "Order Number": row['Number'],
+                                            "Quantity": row['Quantity'], "Model": row['Model'],
+                                            "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
+                                            "Quantity 3": 0,
+                                            "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
+                                            "Quantity 6": row['Quantity'] * 2,
+                                            "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
+                                            "Quantity 9": 0,
+                                            })
+
+        if row['Model'] == "L-Fit Cylinder":
+            data = collection19.insert_one({"Production Order ID": row['Production Order ID'],
+                                            "Order Number": row['Number'],
+                                            "Quantity": row['Quantity'], "Model": row['Model'],
+                                            "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
+                                            "Quantity 3": row['Quantity'] * 2,
+                                            "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
+                                            "Quantity 6": 0,
+                                            "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
+                                            "Quantity 9": 0,
+                                            })
+
+        if row['Model'] == "Dual-Fit Cylinder":
+            data = collection19.insert_one({"Production Order ID": row['Production Order ID'],
+                                            "Order Number": row['Number'],
+                                            "Quantity": row['Quantity'], "Model": row['Model'],
+                                            "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
+                                            "Quantity 3": row['Quantity'],
+                                            "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
+                                            "Quantity 6": row['Quantity'],
+                                            "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
+                                            "Quantity 9": 0,
+                                            })
 
 
 def insert_datetime_selected_rows(selected_rows):
@@ -158,7 +227,7 @@ def create_grid():
     js_code = f"""
     function cell_style(params) {{
         console.log(params.data);
-    
+
         // Check if time_gap is defined before attempting to split
         var timeGapParts;
         console.log("params.data['Time Gap']", params.data['Time Gap']);
@@ -168,30 +237,30 @@ def create_grid():
             // Handle the case where time_gap is undefined (e.g., set a default value)
             timeGapParts = [0, 0, 0];
         }}
-    
+
         console.log('timeGapParts:', timeGapParts);  // Add this line to check the content of timeGapParts
-    
+
         // Ensure timeGapParts has at least three elements (hours, minutes, seconds)
         while (timeGapParts.length < 3) {{
             timeGapParts.push(0);
         }}
-    
+
         // Convert time_gap string to hours
         var hours = parseInt(timeGapParts[0]);
         var minutes = parseInt(timeGapParts[1]);
         var seconds = parseInt(String(timeGapParts[2]).replace('h', ''));
-    
+
         console.log('hours:', hours);  // Add this line to check the value of hours
         console.log('minutes:', minutes);  // Add this line to check the value of minutes
         console.log('seconds:', seconds);  // Add this line to check the value of seconds
-    
+
         var totalHours = hours + minutes / 60 + seconds / 3600;
-    
+
         console.log('totalHours:', totalHours);  // Add this line to check the value of totalHours
-    
+
         // Adjusted logic for background color
         var backgroundColor = totalHours < {param1} ? 'rgb(213, 96, 98)' : (totalHours < {param2} ? 'rgb(244, 211, 94)' : 'white');
-    
+
         return {{
             'color': 'black',
             'backgroundColor': backgroundColor,
@@ -402,14 +471,12 @@ def update_timer():
 
 def find_selected_rows():
     client = MongoClient("mongodb://localhost:27017/")
-
     db = client['local']
-
     collection2 = db['selectedOrders']
 
-    data_selected_rows = collection2.find({}, {'_id': 0, 'Number': 1, 'Reference': 1, 'Delivery Date': 1,
-                                               'Time Gap': 1, 'Description': 1, 'Model': 1, 'Quantity': 1,
-                                               'Color': 1, 'Dimensions': 1})
+    data_selected_rows = collection2.find({}, {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Reference': 1,
+                                               'Delivery Date': 1, 'Time Gap': 1, 'Description': 1, 'Model': 1,
+                                               'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
     return data_selected_rows
 
@@ -418,13 +485,14 @@ def create_grid_selected_rows():
     selected_rows = find_selected_rows()
 
     rows_df = pd.DataFrame(list(selected_rows))
+    if 'Time Gap' in rows_df.columns:
+        rows_df = rows_df.drop(columns=['Time Gap'])
 
     data_frame_selected_rows = st.dataframe(rows_df,
                                             column_config={
                                                 "Number": "Number",
                                                 'Reference': "Reference",
                                                 'Delivery Date': "Delivery Date",
-                                                'Time Gap': "Time Gap",
                                                 'Description': "Description",
                                                 'Model': "Model",
                                                 'Quantity': "Quantity",

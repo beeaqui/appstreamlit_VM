@@ -1,32 +1,36 @@
 from AssemblyFunctions import *
+import extra_streamlit_components as stx
 
 
 def assembly_page():
-    st.title('Assembly Process')
+    st.title('Assembly Process', help='''
+        \n **Note:** Ensure that each step is completed with precision for proper assembly.
+        \n If you encounter any issues or have questions, talk with your teammates or call the instructor. ''')
 
-    with st.expander("View Additional Information", expanded=True):
-        st.markdown(
-            '''
-            \n *Note: Ensure that each step is completed with precision for proper assembly.*
-            \n If you encounter any issues or have questions, talk with your teammates or call the instructor.
-            '''
-        )
     st.caption("")
 
-    option = st.selectbox(
-        ":blue[**Choose the variant of the cylinder to see the assembly operations**]",
-        ("Basic Cylinder", "Connectors Push-in Fitting", "Connectors Push-in L-Fitting", "Mixed Connectors"))
+    game_phase, id_game1, id_game2 = fetch_order_info()
+    handle_buttons(game_phase, id_game1, id_game2)
+    display_images(game_phase)
+
+    tab_bar_data = [
+        stx.TabBarItemData(id=1, title="Standard Cylinder", description=" "),
+        stx.TabBarItemData(id=2, title="Push-in Cylinder", description=" "),
+        stx.TabBarItemData(id=3, title="L-Fit Cylinder", description=" "),
+        stx.TabBarItemData(id=4, title="Dual-Fit Cylinder", description=" ")]
+
+    chosen_id = stx.tab_bar(data=tab_bar_data, default=1)
 
     st.title("")
 
-    if option == "Basic Cylinder":
+    if chosen_id == "1":
         basic_cylinder_operations()
 
-    elif option == "Connectors Push-in Fitting":
+    elif chosen_id == "2":
         push_fitting_operations()
 
-    elif option == "Connectors Push-in L-Fitting":
+    elif chosen_id == "3":
         push_l_operations()
 
-    elif option == "Mixed Connectors":
+    elif chosen_id == "4":
         mixed_connectors_operations()

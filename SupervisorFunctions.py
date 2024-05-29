@@ -239,7 +239,7 @@ def cumulative_finished_orders(db):
 
         order_number = order["Number"]
         if order_number in existing_orders:
-            print(f"Order {order_number} already exists in collection13. Skipping...")
+            # print(f"Order {order_number} already exists in collection13. Skipping...")
             continue
 
         coordinates_x_y = (f"{cumulative_quantities['Quantity Standard']}, "

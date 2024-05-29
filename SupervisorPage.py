@@ -1,9 +1,7 @@
 import extra_streamlit_components as stx
-import streamlit
-from streamlit_autorefresh import st_autorefresh
-
 from OrderThread import *
 from SupervisorFunctions import *
+from ProductionPlanningFunctions import reset_release_id
 import datetime
 
 
@@ -14,14 +12,11 @@ def game_conf(game_option):
 
     count1 = collection18.count_documents({})
 
-    if count1 != 0:
-        collection18.drop()
-        collection18.insert_one({'Game Phase': game_option})
+    if game_option:
+        collection18.update_one({}, {'$set': {'Game Phase': game_option}}, upsert=True)
 
     else:
-        collection18.drop()
-        configuration_default = None
-        collection18.insert_one({'Game Phase': configuration_default})
+        collection18.update_one({}, {'$set': {'Game Phase': None}}, upsert=True)
 
 
 def conf1(configuration1):
@@ -97,24 +92,38 @@ def supervisor_page():
     chosen_id = stx.tab_bar(data=tab_bar_data, default=1)
 
     if chosen_id == "1":
-        st.subheader("Game Configurations")
+        st.subheader("Game Configurations", help='''\n Here you can set some configurations that will define the game. 
+        Select the values for them to be accurate with the reality.''')
+
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client['local']
+
+        def get_selected_game_phase():
+            collection18 = db['GamePhaseConfig']
+
+            document = collection18.find_one()
+            if document:
+                return document.get('Game Phase')
+            return None
+
+        initial_game_option = get_selected_game_phase()
+        options = ("Game 1", "Game 2")
+
+        initial_index = options.index(initial_game_option) if initial_game_option in options else 0
 
         game_option = st.selectbox(label=':blue[Select the game phase in order to proceed]',
-                                   options=("Game 1", "Game 2"), key='game_options', index=None,
+                                   options=options, key='game_options', index=initial_index,
                                    placeholder="Choose the game phase")
         game_conf(game_option)
 
         c1, c2, c3, c4 = st.columns(4)
-        with c4:
+        with c3:
             clear_game = st.button('Clear Game', key='clear_game', type='secondary',
                                    help='Clear all data of the current game',
                                    use_container_width=True)
             if clear_game:
-                client = MongoClient("mongodb://localhost:27017/")
-                db = client['local']
                 semaphore()
-
-                db['ordersCollection'].drop()
+                reset_release_id()
                 db['ordersCollection'].drop()
                 db['selectedOrders'].drop()
                 db['qualityOrders'].drop()
@@ -131,34 +140,31 @@ def supervisor_page():
                 db['PreSelectedOrders'].drop()
                 db['ValueGenerateOrders'].drop()
                 db['HighPriority'].drop()
+                db['MediumPriority'].drop()
+                db['LogisticsOrders'].drop()
+                db['LogisticsOrdersProcess'].drop()
+                db['AssemblyOrders'].drop()
+                db['AssemblyOrdersProcess'].drop()
 
-        c1, c2, c3, c4 = st.columns(4)
-        with c2:
+        with c1:
             create_orders_button = st.button('Start Game', key='create_orders', type='primary',
                                              help='Start Generating Orders',
                                              use_container_width=True)
 
-        with c3:
+        with c2:
             stop_orders_button = st.button('Stop Game', key='stop_orders_button', type='primary',
                                            help='Stop Generating Orders',
                                            use_container_width=True)
 
-        client = MongoClient("mongodb://localhost:27017/")
-        db = client['local']
         collection1 = db['ordersCollection']
 
         if create_orders_button:
+            reset_release_id()
             collection1.drop()
             start_thread()
 
         if stop_orders_button:
             semaphore()
-
-        with st.expander("Quick note:", expanded=True):
-            st.markdown(
-                '''\n Here you can set some configurations that will define the game. Select the values for them to 
-                be accurate with the reality.'''
-            )
 
         st.caption("")
         configuration1 = st.number_input(":blue[Insert the time (in seconds) for the interval of orders generation:]",
@@ -176,12 +182,10 @@ def supervisor_page():
         conf3(configuration3)
 
     if chosen_id == "2":
-        st.subheader("Game Analysis")
-        with st.expander("Quick note:", expanded=True):
-            st.markdown(
-                '''\n This analysis provides important information related  various metrics for an evolutionary 
-                analysis of the production line. \n Pay attention and discuss it with your teammates.'''
-            )
+        st.subheader("Game Analysis", help='''\n This analysis provides important information related  various 
+        metrics for an evolutionary analysis of the production line. \n Pay attention and discuss it with your 
+        teammates.''')
+
         c1, c2 = st.columns(2)
 
         with c1:

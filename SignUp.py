@@ -80,7 +80,7 @@ def sign_up():
 
         username = st.text_input('Username', placeholder='Enter your Username')
 
-        key = st.selectbox('Choose your key', ("Supervisor", "Production Planning",
+        key = st.selectbox('Choose your key', ("Supervisor", "Production Planning", "Logistics Operator",
                                                "Assembly Process", "Quality Control", "Expedition", "Other"))
 
         password = st.text_input('Password', placeholder='Enter your Password', type='password')
@@ -120,5 +120,3 @@ def sign_up():
         with bt1:
             st.form_submit_button('Sign In')
 
-
-sign_up()

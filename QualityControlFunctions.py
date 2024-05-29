@@ -12,32 +12,14 @@ def connect_mongodb():
     return db
 
 
-def find_quality_orders(db):
-    collection2 = db['selectedOrders']
-    collection3 = db['qualityOrders']
-    # collection3.drop()
-
-    data_quality_orders = collection2.find({}, {'_id': 0, 'Number': 1, 'Reference': 1, 'Delivery Date': 1,
-                                                'Time Gap': 1, 'Description': 1, 'Model': 1, 'Quantity': 1,
-                                                'Color': 1, 'Dimensions': 1})
-
-    for row in data_quality_orders:
-        quality_orders = collection3.insert_one(
-            {'Number': row['Number'], 'Reference': row['Reference'], 'Delivery Date': row['Delivery Date'],
-             'Time Gap': row['Time Gap'], 'Description': row['Description'], 'Model': row['Model'],
-             'Quantity': row['Quantity'], 'Color': row['Color'], 'Dimensions': row['Dimensions']})
-
-    collection2.drop()
-    st_autorefresh(limit=2)
-
-
 def find_quality_rows(db):
     collection3 = db['qualityOrders']
 
     # Select all variables from the orders except for id
-    data_quality_orders = collection3.find({}, {'_id': 0, 'Number': 1, 'Reference': 1, 'Delivery Date': 1,
-                                                'Time Gap': 1, 'Description': 1, 'Model': 1, 'Quantity': 1,
-                                                'Color': 1, 'Dimensions': 1})
+    data_quality_orders = collection3.find({}, {'_id': 0, 'Production Order ID': 1, 'Number': 1, 'Reference': 1,
+                                                'Delivery Date': 1, 'Description': 1, 'Model': 1,
+                                                'Quantity': 1, 'Color': 1, 'Dimensions': 1})
+
     data_quality_list = list(data_quality_orders)
 
     return data_quality_list
@@ -50,15 +32,17 @@ def delete_quality_order(db, order_number):
 
 def approved_quality_order(db, order_number):
     collection4 = db['qualityApproved']
-    collection4.insert_one({'Number': order_number['Number'], 'Reference': order_number['Reference'],
-                            'Delivery Date': order_number['Delivery Date'], 'Time Gap': order_number['Time Gap'],
+    collection4.insert_one({"Production Order ID": order_number['Production Order ID'],
+                            'Number': order_number['Number'], 'Reference': order_number['Reference'],
+                            'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})
 
     collection6 = db['expeditionOrders']
-    collection6.insert_one({'Number': order_number['Number'], 'Reference': order_number['Reference'],
-                            'Delivery Date': order_number['Delivery Date'], 'Time Gap': order_number['Time Gap'],
+    collection6.insert_one({"Production Order ID": order_number['Production Order ID'],
+                            'Number': order_number['Number'], 'Reference': order_number['Reference'],
+                            'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})
@@ -66,8 +50,9 @@ def approved_quality_order(db, order_number):
 
 def disapproved_quality_order(db, order_number):
     collection5 = db['qualityDisapproved']
-    collection5.insert_one({'Number': order_number['Number'], 'Reference': order_number['Reference'],
-                            'Delivery Date': order_number['Delivery Date'], 'Time Gap': order_number['Time Gap'],
+    collection5.insert_one({"Production Order ID": order_number['Production Order ID'],
+                            'Number': order_number['Number'], 'Reference': order_number['Reference'],
+                            'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})

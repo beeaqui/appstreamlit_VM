@@ -2,12 +2,9 @@ from QualityControlFunctions import *
 
 
 def quality_page():
-    st.title(":grey[Quality Control]")
+    st.title(":grey[Quality Control]", help='''In order to conduct the quality control process, check all products 
+    specifications to see if it is in accordance with the requirements.''')
 
-    with st.expander("View Detailed Explanation", expanded=True):
-        st.markdown('''In order to conduct the quality control 
-                         process, check all products specifications to see if it
-                         is in accordance with the requirements.''')
     st.caption("")
 
     c1, c2, c3, c4, c5 = st.columns(5)

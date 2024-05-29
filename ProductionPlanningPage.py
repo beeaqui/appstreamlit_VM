@@ -1,6 +1,5 @@
-from OrdersListFunctions import *
-from QualityControlFunctions import *
-from ExpeditionFunctions import *
+from ProductionPlanningFunctions import *
+from LogisticsFunctions import *
 
 
 def production_page():
@@ -8,21 +7,15 @@ def production_page():
     with c:
         update_timer()
 
-    st.title(":gray[Customer Orders]")
-    st.write("")
-
-    # Display a message explaining the purpose of the page
-    with st.expander("View Detailed Explanation", expanded=True):
-        st.markdown(
-            '''
-            \n This is where you can explore a detailed catalog of **Customer Orders**, 
+    st.title(":gray[Customer Orders]",
+             help='''\n This is where you can explore a detailed catalog of **Customer Orders**, 
             each meticulously documented with essential information, as presented in the 
             table below.
             \n At your disposal is the ability to meticulously curate the orders slated for 
             production. This task is simplified through intuitive selection mechanisms, 
-            enabling you to focus on a better production workflow.'''
-        )
-    st.caption("")
+            enabling you to focus on a better production workflow.''')
+
+    st.write("")
 
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
@@ -31,7 +24,6 @@ def production_page():
     count1 = collection1.count_documents({})
 
     if count1 != 0:
-
         grid_container = create_grid()
         selected_rows = grid_container["selected_rows"]
         insert_pre(selected_rows)
@@ -39,12 +31,11 @@ def production_page():
 
         col1, col2, col3 = st.columns(3)
 
-        with col3:
+        with col1:
             submit_button = st.button('Order Release', key='selected_rows_button', type='primary',
                                       help='Submit customer orders for production.',
                                       use_container_width=True)
             if submit_button:
-
                 delete_selected_rows(selected_rows)
 
                 insert_selected_rows(selected_rows)
@@ -53,20 +44,17 @@ def production_page():
                 collection14.drop()
 
                 insert_datetime_selected_rows(selected_rows)
+                increment_release_id()
 
                 st_autorefresh(limit=2, key=f'{selected_rows}')
         st.title("")
 
         # Display a message indicating where the selected orders will be produced
-        st.title(":grey[Orders Released]")
-
-        with st.expander("View Detailed Explanation", expanded=True):
-            st.markdown(
-                '''
+        st.title(":grey[Orders Released]", help='''
                 \n The chosen orders will be displayed below, in **Orders Released** 
                 section. This platform provides the tools you need to stay organized and keep your 
-                production process on track.'''
-            )
+                production process on track.''')
+
         st.caption("")
 
         client = MongoClient("mongodb://localhost:27017/")
@@ -99,8 +87,11 @@ def production_page():
                 # pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
                 btn = open_pdf_selected_orders()
                 if btn:
+                    selected_rows = find_selected_rows()
+                    insert_logistics_orders(selected_rows)
+                    find_logistics_orders()
+                    collection2.drop()
                     insert_production_finished_rows()
-                    find_quality_orders(db=connect_mongodb())
 
         else:
             st.write("No orders available for production yet.")
@@ -118,15 +109,11 @@ def production_page():
         st.title("")
 
         # Display a message indicating where the selected orders will be produced
-        st.title(":grey[Orders Released]")
-
-        with st.expander("View Detailed Explanation", expanded=True):
-            st.markdown(
-                '''
+        st.title(":grey[Orders Released]", help='''
                 \n The chosen orders will be displayed below, in **Orders Released** 
                 section. This platform provides the tools you need to stay organized and keep your 
-                production process on track.'''
-            )
+                production process on track.''')
+
         st.caption("")
 
         client = MongoClient("mongodb://localhost:27017/")
@@ -159,8 +146,11 @@ def production_page():
                 # pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
                 btn = open_pdf_selected_orders()
                 if btn:
+                    selected_rows = find_selected_rows()
+                    insert_logistics_orders(selected_rows)
+                    find_logistics_orders()
+                    collection2.drop()
                     insert_production_finished_rows()
-                    find_quality_orders(db=connect_mongodb())
 
         else:
             st.write("No orders available for production yet.")

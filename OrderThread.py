@@ -11,6 +11,52 @@ from Order import *
 keep_on_going_event = threading.Event()
 
 
+def update_delivery_date():
+    try:
+        # Read the CSV file into memory
+        with open('../appStreamlit/client_orders.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            rows = list(reader)  # Read all rows into a list
+    except Exception as e:
+        print("Error:", e)
+        return  # Exit the function if there's an error opening the file
+
+    updated_rows = []
+    for row in rows:
+        # Generate random delivery date within the next 120 minutes
+        product_delivery_date = datetime.datetime.now() + datetime.timedelta(minutes=random.randint(1, 120))
+        delivery_date = product_delivery_date.strftime('%H:%M') + ' h'
+
+        # Calculate time gap between current time and delivery date
+        current_date = datetime.datetime.now()
+        time_gap = product_delivery_date - current_date
+        total_seconds = time_gap.total_seconds()
+
+        # Convert seconds to hours and minutes
+        hours = int(total_seconds // 3600)
+        minutes = int((total_seconds % 3600) // 60)
+
+        # Format the time gap as "hours:minutes h"
+        time_gap_formatted = f"{hours:02d}:{minutes:02d} h"
+
+        # Update the delivery_date and time_gap fields in the row
+        row['delivery_date'] = delivery_date
+        row['time_gap'] = time_gap_formatted
+
+        # Append the updated row to the list
+        updated_rows.append(row)
+
+    # Write the updated data back to the CSV file
+    with open('../appStreamlit/client_orders.csv', 'w', newline='') as file:
+        fieldnames = reader.fieldnames
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+
+        # Write the header
+        writer.writeheader()
+        # Write the updated rows
+        writer.writerows(updated_rows)
+
+
 def read_orders_from_csv():
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
@@ -88,6 +134,10 @@ def run():
         collection16 = db['HighPriority']
         collection17 = db['MediumPriority']
         collection18 = db['GamePhaseConfig']
+        collection19 = db['LogisticsOrders']
+        collection20 = db['LogisticsOrdersProcess']
+        collection21 = db['AssemblyOrders']
+        collection22 = db['AssemblyOrdersProcess']
 
         print("Connected successfully")
         i = 0
@@ -106,7 +156,12 @@ def run():
         collection12.drop()
         collection13.drop()
         collection14.drop()
+        collection19.drop()
+        collection20.drop()
+        collection21.drop()
+        collection22.drop()
 
+        update_delivery_date()
         order = read_orders_from_csv()
         row_count = 0
 
@@ -114,6 +169,7 @@ def run():
             return
 
         while not keep_on_going_event.is_set():
+
             if row_count >= len(order)-1:
                 semaphore()
 
