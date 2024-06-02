@@ -49,10 +49,11 @@ def insert_logistics_orders(selected_rows):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection19 = db['LogisticsOrders']
+    print("insert_logistics_orders selected_rows: \n", list(selected_rows))
 
     for row in selected_rows:
         if row['Model'] == "Standard Cylinder":
-            data = collection19.insert_one({"Production Order ID": row['Production Order ID'],
+            data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Number'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
@@ -64,7 +65,7 @@ def insert_logistics_orders(selected_rows):
                                             })
 
         if row['Model'] == "Push-in Cylinder":
-            data = collection19.insert_one({"Production Order ID": row['Production Order ID'],
+            data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Number'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
@@ -76,7 +77,7 @@ def insert_logistics_orders(selected_rows):
                                             })
 
         if row['Model'] == "L-Fit Cylinder":
-            data = collection19.insert_one({"Production Order ID": row['Production Order ID'],
+            data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Number'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
@@ -88,7 +89,7 @@ def insert_logistics_orders(selected_rows):
                                             })
 
         if row['Model'] == "Dual-Fit Cylinder":
-            data = collection19.insert_one({"Production Order ID": row['Production Order ID'],
+            data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Number'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
@@ -567,9 +568,7 @@ def open_pdf_selected_orders():
     return btn
 
 
-def insert_production_finished_rows():
-    selected_rows = find_selected_rows()
-
+def insert_production_finished_rows(selected_rows):
     client = MongoClient("mongodb://localhost:27017/")
 
     db = client['local']

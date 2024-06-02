@@ -118,7 +118,7 @@ def supervisor_page():
 
         c1, c2, c3, c4 = st.columns(4)
         with c3:
-            clear_game = st.button('Clear Game', key='clear_game', type='secondary',
+            clear_game = st.button('Clear game', key='clear_game', type='secondary',
                                    help='Clear all data of the current game',
                                    use_container_width=True)
             if clear_game:
@@ -147,12 +147,12 @@ def supervisor_page():
                 db['AssemblyOrdersProcess'].drop()
 
         with c1:
-            create_orders_button = st.button('Start Game', key='create_orders', type='primary',
+            create_orders_button = st.button('Start game', key='create_orders', type='primary',
                                              help='Start Generating Orders',
                                              use_container_width=True)
 
         with c2:
-            stop_orders_button = st.button('Stop Game', key='stop_orders_button', type='primary',
+            stop_orders_button = st.button('Stop game', key='stop_orders_button', type='primary',
                                            help='Stop Generating Orders',
                                            use_container_width=True)
 

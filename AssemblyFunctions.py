@@ -126,16 +126,16 @@ def fetch_order_info():
         id_game2 = search["Order Number"]
 
     count = collection21.count_documents({})
-    c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
-    with c7:
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    with c6:
         st.button(f"Queue: {count}", type="primary")
 
     with st.container(border=True):
         if game_phase == "Game 1":
-            st.write(f':blue[NEXT ORDER TO ASSEMBLE: ] {id_game1}')
+            st.write(f':blue[Next production order to assemble: ] {id_game1}')
 
         if game_phase == "Game 2":
-            st.write(f':blue[NEXT ORDER TO ASSEMBLE: ] {id_game2}')
+            st.write(f':blue[Next production order to assemble: ] {id_game2}')
 
     return game_phase, id_game1, id_game2
 
@@ -256,11 +256,11 @@ def display_images(game_phase):
     global game2_label, game1_label, game1_list, game2_list, final
 
     if final:
-        st.write(f"The production order being picked is: None")
+        st.caption(f"The production order being picked is: None")
 
     else:
         if game_phase == "Game 1":
-            st.write(f"The production order being assembled is: {game1_label}")
+            st.caption(f"The production order being assembled is: {game1_label}")
 
             numbers_list = []
             df_numbers = []
@@ -296,7 +296,7 @@ def display_images(game_phase):
                              hide_index=True)
 
         if game_phase == "Game 2":
-            st.write(f"The production order being assembled is: {game2_label}")
+            st.caption(f"The production order being assembled is: {game2_label}")
 
             numbers_list = []
             df_numbers = []

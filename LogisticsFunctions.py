@@ -50,8 +50,8 @@ def fetch_order_info():
         id_game2 = search["Order Number"]
 
     count = collection19.count_documents({})
-    c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
-    with c7:
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    with c6:
         st.button(f"Queue: {count}", type="primary")
 
     with st.container(border=True):

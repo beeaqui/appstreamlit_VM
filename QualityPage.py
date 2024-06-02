@@ -7,10 +7,6 @@ def quality_page():
 
     st.caption("")
 
-    c1, c2, c3, c4, c5 = st.columns(5)
-    with c5:
-        confirm = st.button('Refresh Data', key=f'refreshQualityBtn', type='primary')
-        if confirm:
-            st_autorefresh(limit=2, key=f"autoRefreshQuality")
+    st_autorefresh(limit=2, interval=20000, key=f"autoRefreshQuality")
 
     quality_checks()

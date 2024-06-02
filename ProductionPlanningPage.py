@@ -32,13 +32,18 @@ def production_page():
         col1, col2, col3 = st.columns(3)
 
         with col1:
-            submit_button = st.button('Order Release', key='selected_rows_button', type='primary',
+            submit_button = st.button('Order release', key='selected_rows_button', type='primary',
                                       help='Submit customer orders for production.',
                                       use_container_width=True)
             if submit_button:
                 delete_selected_rows(selected_rows)
-
                 insert_selected_rows(selected_rows)
+
+                insert_logistics_orders(selected_rows)
+
+                find_logistics_orders()
+
+                insert_production_finished_rows(selected_rows)
 
                 collection14 = db['PreSelectedOrders']
                 collection14.drop()
@@ -73,13 +78,6 @@ def production_page():
             with open(pdf_filename, "rb") as pdf_file:
                 pdf_bytes = pdf_file.read()
 
-            with st.expander("Show Details"):
-                st.markdown(
-                    '''
-                    \n Here you can **open** the PDF file with the orders selected to be produced.'''
-                )
-            st.caption("")
-
             create_pdf_selected_rows()
 
             col1, col2, col3, col4, col5 = st.columns(5)
@@ -87,11 +85,7 @@ def production_page():
                 # pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
                 btn = open_pdf_selected_orders()
                 if btn:
-                    selected_rows = find_selected_rows()
-                    insert_logistics_orders(selected_rows)
-                    find_logistics_orders()
                     collection2.drop()
-                    insert_production_finished_rows()
 
         else:
             st.write("No orders available for production yet.")
@@ -102,7 +96,7 @@ def production_page():
         col1, col2, col3 = st.columns(3)
 
         with col3:
-            submit_button = st.button('Order Release', key='selected_rows_button', type='primary',
+            submit_button = st.button('Order release', key='selected_rows_button', type='primary',
                                       help='Submit customer order for production.',
                                       use_container_width=True)
 
@@ -132,13 +126,6 @@ def production_page():
             with open(pdf_filename, "rb") as pdf_file:
                 pdf_bytes = pdf_file.read()
 
-            with st.expander("Show Details"):
-                st.markdown(
-                    '''
-                    \n Here you can **open** the PDF file with the orders selected to be produced.'''
-                )
-            st.caption("")
-
             create_pdf_selected_rows()
 
             col1, col2, col3, col4, col5 = st.columns(5)
@@ -146,11 +133,7 @@ def production_page():
                 # pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
                 btn = open_pdf_selected_orders()
                 if btn:
-                    selected_rows = find_selected_rows()
-                    insert_logistics_orders(selected_rows)
-                    find_logistics_orders()
                     collection2.drop()
-                    insert_production_finished_rows()
 
         else:
             st.write("No orders available for production yet.")

@@ -50,7 +50,7 @@ def website():
                     permission = []
 
                     if session_key == 'Supervisor':
-                        permission = ["Supervisory Page", "Production Planning", "Logistics Operator",
+                        permission = ["Supervisor", "Production Planning", "Logistics Operator",
                                       'Assembly Process', "Quality Control", "Expedition", "Production Trajectory"]
 
                     if session_key == 'Production Planning':
@@ -85,7 +85,7 @@ def website():
                         # User is authenticated, display the main application interface
                         authenticator.logout('Log Out', 'sidebar')
 
-                    if selected == "Supervisory Page":
+                    if selected == "Supervisor":
                         supervisor_page()
 
                     if selected == "Production Planning":
