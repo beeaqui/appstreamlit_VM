@@ -194,11 +194,11 @@ def display_images(game_phase):
     global quantities, game2_label, game1_label, game1_list, game2_list
 
     if quantities == [0, 0, 0, 0, 0, 0, 0, 0, 0]:
-        st.write(f"The production order being picked is: None")
+        st.caption(f"The production order being picked is: None")
 
     else:
         if game_phase == "Game 1":
-            st.write(f"The production order being picked is: {game1_label}")
+            st.caption(f"The production order being picked is: {game1_label}")
 
             numbers_list = []
             df_numbers = []
@@ -233,7 +233,7 @@ def display_images(game_phase):
                              hide_index=True)
 
         if game_phase == "Game 2":
-            st.write(f"The production order being picked is: {game2_label}")
+            st.caption(f"The production order being picked is: {game2_label}")
 
             numbers_list = []
             df_numbers = []

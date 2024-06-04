@@ -143,13 +143,20 @@ def fetch_order_info():
 def handle_buttons(game_phase, id_game1, id_game2):
     global game2_label, game1_label, game1_list, game2_list, final
     c1, c2, c3, c4 = st.columns(4)
+    numbers_list = []
+
     with c1:
         start = st.button("Start", key='start_picking', use_container_width=True, type="primary",
                           help='Click here when you start picking the materials.')
 
         if start:
-            final = False
+            final = True
             if game_phase == "Game 1":
+
+                if len(numbers_list) > 0:
+                    for number in numbers_list:
+                        collection22.delete_one({"Number": number})
+
                 orders = collection21.find({"Production Order ID": id_game1})
 
                 game1_label = id_game1
@@ -164,32 +171,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
                 for doc in find_for_quality:
                     collection21.delete_one(doc)
-                st_autorefresh(limit=2)
 
-            if game_phase == "Game 2":
-                orders = collection21.find_one({"Order Number": id_game2})
-
-                game2_label = id_game2
-                game2_number_search = collection21.find({'Order Number': game2_label},
-                                                        {'_id': 0, 'Order Number': 1})
-
-                game2_list = list(game2_number_search)
-
-                find_for_quality = collection21.find({'Order Number': game2_label},
-                                                     {'_id': 0, 'Production Order ID': 1,
-                                                      'Order Number': 1, 'Quantity': 1, 'Model': 1})
-
-                for doc in find_for_quality:
-                    collection21.delete_one(doc)
-                st_autorefresh(limit=2)
-
-    with c2:
-        stop = st.button("Finish", key='stop_picking', use_container_width=True, type="primary",
-                         help='Click here when you finish picking the materials.')
-
-        if stop:
-            final = True
-            if game_phase == "Game 1":
                 search = collection21.find_one()
 
                 if search:
@@ -217,9 +199,29 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
                     for doc in find_for_quality:
                         collection3.insert_one(doc)
-                    collection22.delete_one({"Number": number})
 
             if game_phase == "Game 2":
+
+                if len(numbers_list) > 0:
+                    for number in numbers_list:
+                        collection22.delete_one({"Number": number})
+
+                orders = collection21.find_one({"Order Number": id_game2})
+
+                game2_label = id_game2
+                game2_number_search = collection21.find({'Order Number': game2_label},
+                                                        {'_id': 0, 'Order Number': 1})
+
+                game2_list = list(game2_number_search)
+
+                find_for_quality = collection21.find({'Order Number': game2_label},
+                                                     {'_id': 0, 'Production Order ID': 1,
+                                                      'Order Number': 1, 'Quantity': 1, 'Model': 1})
+
+                for doc in find_for_quality:
+                    collection21.delete_one(doc)
+                st_autorefresh(limit=2)
+
                 search = collection21.find_one()
 
                 if search:
@@ -247,7 +249,6 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
                     for doc in find_for_quality:
                         collection3.insert_one(doc)
-                    collection22.delete_one({"Number": number})
 
     return id_game1
 
@@ -255,7 +256,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
 def display_images(game_phase):
     global game2_label, game1_label, game1_list, game2_list, final
 
-    if final:
+    if not final:
         st.caption(f"The production order being picked is: None")
 
     else:
