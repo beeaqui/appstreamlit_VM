@@ -86,16 +86,6 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
                 game1_list = list(game1_number_search)
 
-                find_for_assembly = collection19.find({'Production Order ID': game1_label},
-                                                      {'_id': 0, 'Production Order ID': 1,
-                                                       'Order Number': 1, 'Quantity': 1, 'Model': 1})
-
-                for doc in find_for_assembly:
-                    collection21.insert_one(doc)
-
-                collection19.delete_many({"Production Order ID": id_game1})
-                st_autorefresh(limit=2)
-
             if game_phase == "Game 2":
                 orders = collection19.find_one({"Order Number": id_game2})
                 quantities = [0] * 9
@@ -109,16 +99,6 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
                 game2_list = list(game2_number_search)
 
-                find_for_assembly = collection19.find({'Order Number': game2_label},
-                                                      {'_id': 0, 'Production Order ID': 1,
-                                                       'Order Number': 1, 'Quantity': 1, 'Model': 1})
-
-                for doc in find_for_assembly:
-                    collection21.insert_one(doc)
-
-                collection19.delete_one({"Order Number": id_game2})
-                st_autorefresh(limit=2)
-
     with c2:
         stop = st.button("Finish", key='stop_picking', use_container_width=True, type="primary",
                          help='Click here when you finish picking the materials.')
@@ -126,6 +106,17 @@ def handle_buttons(game_phase, id_game1, id_game2):
         if stop:
             if game_phase == "Game 1":
                 quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+                find_for_assembly = collection19.find({'Production Order ID': game1_label},
+                                                      {'_id': 0, 'Production Order ID': 1,
+                                                       'Order Number': 1, 'Quantity': 1, 'Model': 1})
+
+                for doc in find_for_assembly:
+                    collection21.insert_one(doc)
+
+                collection19.delete_many({"Production Order ID": id_game1})
+                st_autorefresh(limit=2)
+
                 search = collection19.find_one()
 
                 if search:
@@ -158,6 +149,16 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
             if game_phase == "Game 2":
                 quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                find_for_assembly = collection19.find({'Order Number': game2_label},
+                                                      {'_id': 0, 'Production Order ID': 1,
+                                                       'Order Number': 1, 'Quantity': 1, 'Model': 1})
+
+                for doc in find_for_assembly:
+                    collection21.insert_one(doc)
+
+                collection19.delete_one({"Order Number": id_game2})
+                st_autorefresh(limit=2)
+
                 search = collection19.find_one()
 
                 if search:

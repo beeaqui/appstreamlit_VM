@@ -49,7 +49,6 @@ def insert_logistics_orders(selected_rows):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection19 = db['LogisticsOrders']
-    print("insert_logistics_orders selected_rows: \n", list(selected_rows))
 
     for row in selected_rows:
         if row['Model'] == "Standard Cylinder":
