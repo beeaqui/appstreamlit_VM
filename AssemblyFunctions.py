@@ -99,14 +99,14 @@ def mixed_connectors_operations():
 
 
 def find_quality_orders():
-    data_quality_orders = collection22.find({}, {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Reference': 1,
-                                                 'Delivery Date': 1, 'Description': 1, 'Model': 1, 'Quantity': 1,
-                                                 'Color': 1, 'Dimensions': 1})
+    data_quality_orders = collection22.find({}, {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Order Line': 1,
+                                                 'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
+                                                 'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
     for row in data_quality_orders:
         quality_orders = collection3.insert_one(
             {"Production Order ID": row['Production Order ID'], 'Number': row['Number'],
-             'Reference': row['Reference'], 'Delivery Date': row['Delivery Date'],
+             'Order line': row['Order Line'], 'Reference': row['Reference'], 'Delivery Date': row['Delivery Date'],
              'Description': row['Description'], 'Model': row['Model'],
              'Quantity': row['Quantity'], 'Color': row['Color'], 'Dimensions': row['Dimensions']})
 
@@ -193,7 +193,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
                 for number in numbers_list:
                     find_for_quality = collection22.find({'Number': number},
                                                          {'_id': 0, 'Production Order ID': 1, 'Number': 1,
-                                                          'Reference': 1, 'Delivery Date': 1,
+                                                          'Order Line': 1, 'Reference': 1, 'Delivery Date': 1,
                                                           'Description': 1, 'Model': 1, 'Quantity': 1,
                                                           'Color': 1, 'Dimensions': 1})
 
@@ -243,7 +243,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
                 for number in numbers_list:
                     find_for_quality = collection22.find({'Number': number},
                                                          {'_id': 0, 'Production Order ID': 1, 'Number': 1,
-                                                          'Reference': 1, 'Delivery Date': 1,
+                                                          'Order Line': 1, 'Reference': 1, 'Delivery Date': 1,
                                                           'Description': 1, 'Model': 1, 'Quantity': 1,
                                                           'Color': 1, 'Dimensions': 1})
 
@@ -273,8 +273,8 @@ def display_images(game_phase):
 
                 for number in numbers_list:
                     find_number = collection22.find({'Number': number},
-                                                    {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Reference': 1,
-                                                     'Delivery Date': 1,
+                                                    {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Order Line': 1,
+                                                     'Reference': 1, 'Delivery Date': 1,
                                                      'Description': 1, 'Model': 1, 'Quantity': 1,
                                                      'Color': 1, 'Dimensions': 1})
                     df_numbers.extend(list(find_number))
@@ -282,15 +282,27 @@ def display_images(game_phase):
                 # Convert the cursor to a list of documents and then to a DataFrame
                 rows_df = pd.DataFrame(df_numbers)
 
+                if 'Quantity' in rows_df.columns:
+                    columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date',
+                               'Model', 'Description', 'Color', 'Dimensions']
+                    rows_df = rows_df.reindex(columns=columns)
+
+                rows_df = rows_df.rename(columns={
+                    "Production Order ID": 'Production ID',
+                    'Number': 'Customer Order',
+                    'Reference': 'Product Ref.'
+                })
+
                 st.dataframe(rows_df,
                              column_config={
-                                 "Production Order ID": "Production Order ID",
-                                 "Number": "Number",
-                                 'Reference': "Reference",
-                                 'Delivery Date': "Delivery Date",
-                                 'Description': "Description",
-                                 'Model': "Model",
+                                 "Production ID": 'Production ID',
+                                 "Customer Order": "Customer Order",
+                                 "Order Line": "Order Line",
+                                 'Product Ref.': "Product Ref.",
                                  'Quantity': "Quantity",
+                                 'Delivery Date': "Delivery Date",
+                                 'Model': "Model",
+                                 'Description': "Description",
                                  'Color': "Color",
                                  'Dimensions': "Dimensions"
                              },
@@ -309,22 +321,34 @@ def display_images(game_phase):
 
                 for number in numbers_list:
                     find_number = collection22.find({'Number': number},
-                                                    {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Reference': 1,
-                                                     'Delivery Date': 1, 'Description': 1, 'Model': 1, 'Quantity': 1,
-                                                     'Color': 1, 'Dimensions': 1})
+                                                    {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Order Line': 1,
+                                                     'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
+                                                     'Quantity': 1, 'Color': 1, 'Dimensions': 1})
                     df_numbers.extend(list(find_number))
 
                 rows_df = pd.DataFrame(df_numbers)
 
+                if 'Quantity' in rows_df.columns:
+                    columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date',
+                               'Model', 'Description', 'Color', 'Dimensions']
+                    rows_df = rows_df.reindex(columns=columns)
+
+                rows_df = rows_df.rename(columns={
+                    "Production Order ID": 'Production ID',
+                    'Number': 'Customer Order',
+                    'Reference': 'Product Ref.'
+                })
+
                 st.dataframe(rows_df,
                              column_config={
-                                 "Production Order ID": "Production Order ID",
-                                 "Number": "Number",
-                                 'Reference': "Reference",
-                                 'Delivery Date': "Delivery Date",
-                                 'Description': "Description",
-                                 'Model': "Model",
+                                 "Production ID": 'Production ID',
+                                 "Customer Order": "Customer Order",
+                                 "Order Line": "Order Line",
+                                 'Product Ref.': "Product Ref.",
                                  'Quantity': "Quantity",
+                                 'Delivery Date': "Delivery Date",
+                                 'Model': "Model",
+                                 'Description': "Description",
                                  'Color': "Color",
                                  'Dimensions': "Dimensions"
                              },

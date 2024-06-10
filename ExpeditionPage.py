@@ -8,6 +8,4 @@ def expedition_page():
 
     st.caption("")
 
-    st_autorefresh(limit=2, interval=20000, key=f"autoRefreshExpedition")
-
     display_tables_expedition()

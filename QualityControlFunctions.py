@@ -16,11 +16,9 @@ def find_quality_rows(db):
     collection3 = db['qualityOrders']
 
     # Select all variables from the orders except for id
-    data_quality_orders = collection3.find({}, {'_id': 0, 'Production Order ID': 1, 'Number': 1, 'Reference': 1,
-                                                'Delivery Date': 1, 'Description': 1, 'Model': 1,
-                                                'Quantity': 1, 'Color': 1, 'Dimensions': 1})
-
-    data_quality_list = list(data_quality_orders)
+    data_quality_list = collection3.find({}, {'_id': 0, 'Production Order ID': 1, 'Number': 1, 'Order Line': 1,
+                                              'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
+                                              'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
     return data_quality_list
 
@@ -32,17 +30,17 @@ def delete_quality_order(db, order_number):
 
 def approved_quality_order(db, order_number):
     collection4 = db['qualityApproved']
-    collection4.insert_one({"Production Order ID": order_number['Production Order ID'],
-                            'Number': order_number['Number'], 'Reference': order_number['Reference'],
-                            'Delivery Date': order_number['Delivery Date'],
+    collection4.insert_one({"Production Order ID": order_number['Production ID'],
+                            'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
+                            'Reference': order_number['Product Ref.'], 'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})
 
     collection6 = db['expeditionOrders']
-    collection6.insert_one({"Production Order ID": order_number['Production Order ID'],
-                            'Number': order_number['Number'], 'Reference': order_number['Reference'],
-                            'Delivery Date': order_number['Delivery Date'],
+    collection6.insert_one({"Production Order ID": order_number['Production ID'],
+                            'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
+                            'Reference': order_number['Product Ref.'], 'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})
@@ -50,9 +48,9 @@ def approved_quality_order(db, order_number):
 
 def disapproved_quality_order(db, order_number):
     collection5 = db['qualityDisapproved']
-    collection5.insert_one({"Production Order ID": order_number['Production Order ID'],
-                            'Number': order_number['Number'], 'Reference': order_number['Reference'],
-                            'Delivery Date': order_number['Delivery Date'],
+    collection5.insert_one({"Production Order ID": order_number['Production ID'],
+                            'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
+                            'Reference': order_number['Product Ref.'], 'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})
@@ -64,7 +62,20 @@ def quality_checks():
 
     quality_rows = find_quality_rows(db)
 
-    data_groups = [quality_rows[i:i + 2] for i in range(0, len(quality_rows), 2)]
+    rows_df = pd.DataFrame(list(quality_rows))
+
+    if 'Quantity' in rows_df.columns:
+        columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
+                   'Description', 'Color', 'Dimensions']
+        rows_df = rows_df.reindex(columns=columns)
+
+    rows_df = rows_df.rename(columns={
+        "Production Order ID": 'Production ID',
+        'Number': 'Customer Order',
+        'Reference': 'Product Ref.'
+    })
+
+    data_groups = [list(rows_df.iloc[i:i + 2].to_dict(orient='records')) for i in range(0, len(rows_df), 2)]
 
     for group in data_groups:
         columns = st.columns(2)
@@ -81,7 +92,7 @@ def quality_checks():
                     f"border-radius: 10px; "
                     f"margin-top: 50px; "
                     f"margin-bottom: 10px;'>"
-                    f"Details: customer order {quality_order['Number']}</div>",
+                    f"Details - Customer Order {quality_order['Customer Order']}</div>",
                     unsafe_allow_html=True)
 
                 data = []
@@ -91,12 +102,12 @@ def quality_checks():
                     data.append({'Attribute': formatted_key, 'Value': value})
 
                 data_frame = pd.DataFrame(data)
-                st.dataframe(data_frame, hide_index=True, use_container_width=True)
 
+                st.dataframe(data_frame, hide_index=True, use_container_width=True)
                 c1, c2 = st.columns(2)
                 with c1:
 
-                    approve = st.button('Approve', key=f"button_approve{quality_order['Number']}",
+                    approve = st.button('Approve', key=f"button_approve{quality_order['Customer Order']}",
                                         use_container_width=True)
                     st.markdown(
                         """
@@ -152,13 +163,13 @@ def quality_checks():
 
                     if approve:
                         approved_quality_order(db, quality_order)
-                        delete_quality_order(db, quality_order['Number'])
+                        delete_quality_order(db, quality_order['Customer Order'])
 
-                        st.toast(f"Order number {quality_order['Number']} has been approved", icon='✔️')
-                        st_autorefresh(limit=2, key=f"approve{quality_order['Number']}")
+                        st.toast(f"Order number {quality_order['Customer Order']} has been approved", icon='✔️')
+                        st_autorefresh(limit=2, key=f"approve{quality_order['Customer Order']}")
 
                 with c2:
-                    disapprove = st.button('Disapprove', key=f"button_disapprove{quality_order['Number']}")
+                    disapprove = st.button('Disapprove', key=f"button_disapprove{quality_order['Customer Order']}")
                     st.markdown(
                         """
                         <style>
@@ -213,7 +224,7 @@ def quality_checks():
 
                     if disapprove:
                         disapproved_quality_order(db, quality_order)
-                        delete_quality_order(db, quality_order['Number'])
+                        delete_quality_order(db, quality_order['Customer Order'])
 
-                        st.toast(f"Order number {quality_order['Number']} has been disapproved", icon='✖️')
-                        st_autorefresh(limit=2, key=f"disapprove{quality_order['Number']}")
+                        st.toast(f"Order number {quality_order['Customer Order']} has been disapproved", icon='✖️')
+                        st_autorefresh(limit=2, key=f"disapprove{quality_order['Customer Order']}")

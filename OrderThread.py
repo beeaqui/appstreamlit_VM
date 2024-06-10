@@ -72,6 +72,7 @@ def read_orders_from_csv():
                 for row in csv_reader:
                     orders.append(Order(
                         str(row['number']),
+                        row['order_line'],
                         int(row['reference']),
                         row['delivery_date'],
                         row['time_gap'],
@@ -94,6 +95,7 @@ def read_orders_from_csv():
                         picker = str(i + 1)
                         orders.append(Order(
                             str(picker + '/' + row['quantity']),
+                            row['order_line'],
                             int(row['reference']),
                             row['delivery_date'],
                             row['time_gap'],
@@ -178,7 +180,8 @@ def run():
 
             for aux_count in range(aux_count, len(order)):
                 collection.insert_one(
-                    {'number': order[aux_count].number, 'reference': order[aux_count].reference,
+                    {'number': order[aux_count].number, 'order_line': order[aux_count].order_line,
+                     'reference': order[aux_count].reference,
                      'delivery_date': order[aux_count].delivery_date,
                      'time_gap': order[aux_count].time_gap, 'description': order[aux_count].description,
                      'model': order[aux_count].model,

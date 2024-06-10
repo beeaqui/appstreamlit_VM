@@ -7,6 +7,4 @@ def quality_page():
 
     st.caption("")
 
-    st_autorefresh(limit=2, interval=20000, key=f"autoRefreshQuality")
-
     quality_checks()

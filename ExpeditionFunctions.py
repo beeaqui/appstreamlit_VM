@@ -17,13 +17,11 @@ def connect_mongodb():
 def find_expedition_orders(db):
     collection6 = db['expeditionOrders']
 
-    expedition_orders = collection6.find({}, {'_id': 0, 'Production Order ID': 1, 'Number': 1, 'Reference': 1,
-                                              'Delivery Date': 1, 'Description': 1, 'Model': 1,
+    expedition_orders = collection6.find({}, {'_id': 0, 'Production Order ID': 1, 'Number': 1, 'Order Line': 1,
+                                              'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
                                               'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
-    expedition_orders_list = list(expedition_orders)
-
-    return expedition_orders_list
+    return expedition_orders
 
 
 def delete_expedition_order(db, order_number):
@@ -34,8 +32,8 @@ def delete_expedition_order(db, order_number):
 def concluded_orders(db, order_number):
     collection7 = db['ordersConcluded']
 
-    collection7.insert_one({'Number': order_number['Number'], 'Reference': order_number['Reference'],
-                            'Delivery Date': order_number['Delivery Date'],
+    collection7.insert_one({'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
+                            'Reference': order_number['Product Ref.'], 'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})
@@ -45,9 +43,22 @@ def display_tables_expedition():
     db = connect_mongodb()
     collection6 = db['expeditionOrders']
 
-    expedition_orders_list = find_expedition_orders(db)
+    expedition_orders = find_expedition_orders(db)
 
-    data_groups = [expedition_orders_list[i:i + 2] for i in range(0, len(expedition_orders_list), 2)]
+    rows_df = pd.DataFrame(list(expedition_orders))
+
+    if 'Quantity' in rows_df.columns:
+        columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
+                   'Description', 'Color', 'Dimensions']
+        rows_df = rows_df.reindex(columns=columns)
+
+    rows_df = rows_df.rename(columns={
+        "Production Order ID": 'Production ID',
+        'Number': 'Customer Order',
+        'Reference': 'Product Ref.'
+    })
+
+    data_groups = [list(rows_df.iloc[i:i + 2].to_dict(orient='records')) for i in range(0, len(rows_df), 2)]
 
     for group in data_groups:
         columns = st.columns(2)
@@ -64,7 +75,7 @@ def display_tables_expedition():
                     f"border-radius: 10px; "
                     f"margin-top: 50px; "
                     f"margin-bottom: 10px;'>"
-                    f"Details: customer order {expedition_order['Number']}</div>",
+                    f"Details - Customer Order {expedition_order['Customer Order']}</div>",
                     unsafe_allow_html=True)
 
                 data = []
@@ -81,11 +92,12 @@ def display_tables_expedition():
                     confirm = st.button('Dispatch', key=f'{expedition_order}', type='primary')
                     if confirm:
                         concluded_orders(db, expedition_order)
-                        insert_confirmation_data(expedition_order['Number'])
-                        delete_expedition_order(db, expedition_order['Number'])
+                        insert_confirmation_data(expedition_order['Customer Order'])
+                        delete_expedition_order(db, expedition_order['Customer Order'])
 
-                        st.toast(f"Order number {expedition_order['Number']} has been successfully shipped", icon='✔️')
-                        st_autorefresh(limit=2, key=f"{expedition_order['Number']}")
+                        st.toast(f"Order number {expedition_order['Customer Order']} has been successfully shipped",
+                                 icon='✔️')
+                        st_autorefresh(limit=2, key=f"{expedition_order['Customer Order']}")
                         cumulative_finished_orders(db)
 
 

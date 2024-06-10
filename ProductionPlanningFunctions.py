@@ -18,6 +18,7 @@ from reportlab.lib import colors
 # import streamlit_pdf_viewer as st_pdf
 
 release_id = 1
+game_phase = ''
 
 
 def insert_selected_rows(selected_rows):
@@ -27,7 +28,8 @@ def insert_selected_rows(selected_rows):
 
     for row in selected_rows:
         selected_orders = collection2.insert_one(
-            {"Production Order ID": release_id, 'Number': row['Number'], 'Reference': row['Reference'],
+            {'Production Order ID': release_id, 'Number': row['Customer Order'], 'Order Line': row['Order Line'],
+             'Reference': row['Product Ref.'],
              'Delivery Date': row['Delivery Date'], 'Time Gap': row['Time Gap'],
              'Description': row['Description'], 'Model': row['Model'], 'Quantity': row['Quantity'],
              'Color': row['Color'], 'Dimensions': row['Dimensions']})
@@ -49,11 +51,12 @@ def insert_logistics_orders(selected_rows):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection19 = db['LogisticsOrders']
+    print("insert_logistics_orders selected_rows: \n", list(selected_rows))
 
     for row in selected_rows:
         if row['Model'] == "Standard Cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
-                                            "Order Number": row['Number'],
+                                            "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": 0,
@@ -65,7 +68,7 @@ def insert_logistics_orders(selected_rows):
 
         if row['Model'] == "Push-in Cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
-                                            "Order Number": row['Number'],
+                                            "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": 0,
@@ -77,7 +80,7 @@ def insert_logistics_orders(selected_rows):
 
         if row['Model'] == "L-Fit Cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
-                                            "Order Number": row['Number'],
+                                            "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": row['Quantity'] * 2,
@@ -89,7 +92,7 @@ def insert_logistics_orders(selected_rows):
 
         if row['Model'] == "Dual-Fit Cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
-                                            "Order Number": row['Number'],
+                                            "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": row['Quantity'],
@@ -123,7 +126,7 @@ def insert_datetime_selected_rows(selected_rows):
     }
 
     for row in selected_rows:
-        order_number = row['Number']
+        order_number = row['Customer Order']
         order_numbers.append(order_number)
 
         data_to_insert['Orders Number'] = order_numbers
@@ -140,7 +143,7 @@ def delete_selected_rows(selected_rows):
     collection = db['ordersCollection']
 
     for row in selected_rows:
-        my_row = {'number': row['Number']}
+        my_row = {'number': row['Customer Order']}
         collection.delete_one(my_row)
 
 
@@ -151,7 +154,7 @@ def find_data_order():
 
     collection = db['ordersCollection']
 
-    data = collection.find({}, {'_id': 0, 'number': 1,
+    data = collection.find({}, {'_id': 0, 'number': 1, 'order_line': 1,
                                 'reference': 1, 'delivery_date': 1, 'time_gap': 1, 'description': 1,
                                 'model': 1, 'quantity': 1, 'color': 1, 'dimensions': 1})
     return data
@@ -166,10 +169,10 @@ def insert_pre(selected_rows):
     collection14.drop()
 
     for row in selected_rows:
-        existing_document = collection14.find_one({'Number': row['Number']})
+        existing_document = collection14.find_one({'Number': row['Customer Order']})
 
         if not existing_document:
-            ppselected_orders = collection14.insert_one({'Number': row['Number']})
+            ppselected_orders = collection14.insert_one({'Number': row['Customer Order']})
 
 
 def find_pre(order_df, table_ids_selected):
@@ -188,25 +191,35 @@ def find_pre(order_df, table_ids_selected):
 
         for number in re_selected_orders:
 
-            if number in order_df['Number'].values:
-                position = order_df.index[order_df['Number'] == number][0]
+            if number in order_df['Customer Order'].values:
+                position = order_df.index[order_df['Customer Order'] == number][0]
                 table_ids_selected[str(position)] = True
 
     return table_ids_selected
 
 
 def create_grid():
+    global game_phase
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection18 = db['GamePhaseConfig']
+    document = collection18.find_one()
+    game_phase = document.get('Game Phase')
+
     data = find_data_order()
 
     order_df = pd.DataFrame(find_data_order(),
-                            columns=['number', 'reference', 'delivery_date', 'time_gap', 'description', 'model',
-                                     'quantity', 'color', 'dimensions'])
+                            columns=['number', 'order_line', 'reference', 'delivery_date', 'time_gap', 'description',
+                                     'model', 'quantity', 'color', 'dimensions'])
 
-    data_renamed = [{'Number': d['number'], 'Reference': d['reference'], 'Delivery Date': d['delivery_date'],
-                     'Time Gap': d['time_gap'], 'Description': d['description'], 'Model': d['model'],
+    data_renamed = [{'Customer Order': d['number'], 'Order Line': d['order_line'], 'Product Ref.': d['reference'],
+                     'Delivery Date': d['delivery_date'], 'Time Gap': d['time_gap'],
+                     'Description': d['description'], 'Model': d['model'],
                      'Quantity': d['quantity'], 'Color': d['color'], 'Dimensions': d['dimensions']} for d in data]
 
     order_df = pd.DataFrame(data_renamed)
+    order_df = order_df.reindex(columns=['Customer Order', 'Order Line', 'Product Ref.', 'Quantity', 'Delivery Date',
+                                         'Time Gap', 'Model', 'Description', 'Color', 'Dimensions'])
 
     gd = GridOptionsBuilder.from_dataframe(order_df)
 
@@ -474,7 +487,8 @@ def find_selected_rows():
     db = client['local']
     collection2 = db['selectedOrders']
 
-    data_selected_rows = collection2.find({}, {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Reference': 1,
+    data_selected_rows = collection2.find({}, {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Order Line': 1,
+                                               'Reference': 1,
                                                'Delivery Date': 1, 'Time Gap': 1, 'Description': 1, 'Model': 1,
                                                'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
@@ -487,17 +501,33 @@ def create_grid_selected_rows():
     rows_df = pd.DataFrame(list(selected_rows))
     if 'Time Gap' in rows_df.columns:
         rows_df = rows_df.drop(columns=['Time Gap'])
+    if 'Color' in rows_df.columns:
+        rows_df = rows_df.drop(columns=['Color'])
+    if 'Dimensions' in rows_df.columns:
+        rows_df = rows_df.drop(columns=['Dimensions'])
+
+    if 'Quantity' in rows_df.columns:
+        columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
+                   'Description']
+        rows_df = rows_df.reindex(columns=columns)
+
+    rows_df = rows_df.rename(columns={
+        "Production Order ID": 'Production ID',
+        'Number': 'Customer Order',
+        'Reference': 'Product Ref.'
+    })
 
     data_frame_selected_rows = st.dataframe(rows_df,
                                             column_config={
-                                                "Number": "Number",
-                                                'Reference': "Reference",
-                                                'Delivery Date': "Delivery Date",
-                                                'Description': "Description",
-                                                'Model': "Model",
+                                                "Production ID": 'Production ID',
+                                                "Customer Order": "Customer Order",
+                                                "Order Line": "Order Line",
+                                                'Product Ref.': "Product Ref.",
                                                 'Quantity': "Quantity",
-                                                'Color': "Color",
-                                                'Dimensions': "Dimensions"
+                                                'Delivery Date': "Delivery Date",
+                                                'Model': "Model",
+                                                'Description': "Description"
+
                                             },
                                             hide_index=True)
 
@@ -590,7 +620,7 @@ def insert_production_finished_rows(selected_rows):
     }
 
     for row in selected_rows:
-        order_number = row['Number']
+        order_number = row['Customer Order']
         order_numbers.append(order_number)
 
         data_to_insert['Orders Number'] = order_numbers

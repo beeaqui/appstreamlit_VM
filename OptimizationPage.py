@@ -1,7 +1,7 @@
 from OptimizationFunctions import *
 
 
-def other_page():
+def optimization_trajetory():
     st.title("Linear Programming Model")
 
     st.write("**Constraints:** ax + bx = c")
