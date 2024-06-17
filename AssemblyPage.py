@@ -3,7 +3,7 @@ import extra_streamlit_components as stx
 
 
 def assembly_page():
-    st.title('Assembly Process', help='''
+    st.title('Assembly process', help='''
         \n **Note:** Ensure that each step is completed with precision for proper assembly.
         \n If you encounter any issues or have questions, talk with your teammates or call the instructor. ''')
 
@@ -14,10 +14,10 @@ def assembly_page():
     display_images(game_phase)
 
     tab_bar_data = [
-        stx.TabBarItemData(id=1, title="Standard Cylinder", description=" "),
-        stx.TabBarItemData(id=2, title="Push-in Cylinder", description=" "),
-        stx.TabBarItemData(id=3, title="L-Fit Cylinder", description=" "),
-        stx.TabBarItemData(id=4, title="Dual-Fit Cylinder", description=" ")]
+        stx.TabBarItemData(id=1, title="Standard cylinder", description=" "),
+        stx.TabBarItemData(id=2, title="Push-in cylinder", description=" "),
+        stx.TabBarItemData(id=3, title="L-Fit cylinder", description=" "),
+        stx.TabBarItemData(id=4, title="Dual-Fit cylinder", description=" ")]
 
     chosen_id = stx.tab_bar(data=tab_bar_data, default=1)
 

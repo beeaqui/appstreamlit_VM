@@ -83,7 +83,7 @@ def solution(coefficients, x_coefficients, y_coefficients, objective_coefficient
                              mode='markers', marker=dict(size=4), name='Trajectory'))
 
     # style updates
-    fig.update_layout(xaxis=dict(title='Standard Cylinder', range=[min(point[0] for point in vertices_polygon) - 2,
+    fig.update_layout(xaxis=dict(title='Standard cylinder', range=[min(point[0] for point in vertices_polygon) - 2,
                                                                    max(point[0] for point in vertices_polygon) + 2],
                                  title_font=dict(color='black'),
                                  tickfont=dict(color='black')),
@@ -94,7 +94,7 @@ def solution(coefficients, x_coefficients, y_coefficients, objective_coefficient
                                  tickfont=dict(color='black')),
                       showlegend=False,
                       width=width6,
-                      title='Linear Programming Problem',
+                      title='Linear programming problem',
                       height=420,
                       )
 
@@ -294,10 +294,10 @@ def plot_generated_orders(width1):
 
     x_labels = [int((t - time_intervals[0]).seconds) for t in time_intervals]
 
-    plotly_df = pd.DataFrame({'Time': x_labels, 'Customer Orders': cumulative_orders})
+    plotly_df = pd.DataFrame({'Time': x_labels, 'Customer orders': cumulative_orders})
 
-    fig = px.line(plotly_df, x='Time', y='Customer Orders', labels={'Time': 'Time (seconds)'},
-                  title='Order Generation Status',
+    fig = px.line(plotly_df, x='Time', y='Customer orders', labels={'Time': 'Time (seconds)'},
+                  title='Order generation status',
                   line_shape='hv',
                   color_discrete_sequence=['rgb(49, 90, 146)'])
 
@@ -316,7 +316,7 @@ def plot_generated_orders(width1):
     fig.update_layout(
         width=width1,
         xaxis=dict(tickfont=dict(color='black'), title=dict(text='Time (seconds)', font_color='black')),
-        yaxis=dict(tickfont=dict(color='black'), title=dict(text='Customer Orders', font_color='black')),
+        yaxis=dict(tickfont=dict(color='black'), title=dict(text='Customer orders', font_color='black')),
     )
 
     st.plotly_chart(fig)
@@ -386,7 +386,7 @@ def wip_plot(width2):
             tickfont=dict(color='black'),
             title=dict(text='Work', font_color='black'),
         ),
-        title='Cumulative Order Progress',
+        title='Cumulative order progress',
         hovermode='closest',
         width=350,
         legend=dict(x=0.5, y=1.2, traceorder='normal', orientation='v'),
@@ -458,7 +458,7 @@ def wip_plot(width2):
             tickfont=dict(color='black'),
             title=dict(text='Cumulative Orders', font_color='black'),
         ),
-        title='Cumulative Order Progress',
+        title='Cumulative order progress',
         hovermode='closest',
         width=width2,
         legend=dict(x=0.5, y=1.2, traceorder='normal', orientation='v'),
@@ -544,7 +544,7 @@ def leadtime(width4):
 
     # Create a bar chart using Plotly Express
     fig = px.bar(df, x='Lead Time', y='Order Number', orientation='h',
-                 title='Order Lead Time Visualization', labels={'Lead Time': 'Lead Time (seconds) '}, )
+                 title='Order lead time visualization', labels={'Lead Time': 'Lead Time (seconds) '}, )
 
     # Customize the layout
     fig.update_traces(marker_color='rgb(49, 90, 146)', marker_line_color='rgb(49, 90, 146)',
@@ -585,7 +585,7 @@ def quality_distribution(width3):
 
     # Update layout
     fig.update_layout(
-        title='Quality Distribution',
+        title='Quality distribution',
         xaxis=dict(title='Quantity', title_font=dict(color='black'), tickfont=dict(color='black')),
         yaxis=dict(title='Quality', title_font=dict(color='black'), tickfont=dict(color='black')),
         width=width3,
@@ -609,13 +609,13 @@ def orders_distribution(width5):
     expedition_orders = collection6.count_documents({})
 
     df = {
-        'Workstation': ['Production Planning', 'Quality Control', 'Expedition Orders'],
+        'Workstation': ['Production planning', 'Quality control', 'Expedition Orders'],
         'Quantity': [production_orders, quality_orders, expedition_orders]
     }
 
     fig = px.bar(df, x='Quantity', y='Workstation',
                  orientation='h',
-                 title='Workstations Order Distribution',
+                 title='Workstations order distribution',
                  color='Workstation',
                  color_discrete_sequence=['rgb(166, 58, 80)', 'rgb(49, 90, 146)', 'rgb(219, 173, 106)'])
 

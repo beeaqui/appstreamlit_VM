@@ -92,7 +92,7 @@ def quality_checks():
                     f"border-radius: 10px; "
                     f"margin-top: 50px; "
                     f"margin-bottom: 10px;'>"
-                    f"Details - Customer Order {quality_order['Customer Order']}</div>",
+                    f"Details - Customer order {quality_order['Customer Order']}</div>",
                     unsafe_allow_html=True)
 
                 data = []

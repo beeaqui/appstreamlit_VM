@@ -40,7 +40,7 @@ def website():
                  "Welcome to Your Application. Please Login to Continue.")
 
         st.caption('')
-        organization = st.text_input(f":blue[**Insert your organization:**]", key='org')
+        organization = st.text_input(f":blue[**Insert your organization**]", key='org')
         st_autorefresh(limit=2, key='log in')
 
     authenticator = Authenticate(credentials, cookie_name='Streamlit', cookie_key='key', cookie_expiry_days=4)
@@ -55,26 +55,26 @@ def website():
                 permission = []
 
                 if session_key == 'Supervisor':
-                    permission = ["Supervisor", "Production Planning", "Logistics Operator",
-                                  'Assembly Process', "Quality Control", "Expedition", "Production Trajectory"]
+                    permission = ["Supervisor", "Production planning", "Logistics operator",
+                                  'Assembly process', "Quality control", "Expedition", "Production trajectory"]
 
-                if session_key == 'Production Planning':
-                    permission = ["Production Planning"]
+                if session_key == 'Production planning':
+                    permission = ["Production planning"]
 
-                if session_key == 'Assembly Process':
-                    permission = ["Assembly Process"]
+                if session_key == 'Assembly process':
+                    permission = ["Assembly process"]
 
-                if session_key == 'Logistics Operator':
-                    permission = ["Logistics Operator"]
+                if session_key == 'Logistics operator':
+                    permission = ["Logistics operator"]
 
-                if session_key == 'Quality Control':
-                    permission = ["Quality Control"]
+                if session_key == 'Quality control':
+                    permission = ["Quality control"]
 
                 if session_key == 'Expedition':
                     permission = ["Expedition"]
 
-                if session_key == 'Production Trajectory':
-                    permission = ["Production Trajectory"]
+                if session_key == 'Production trajectory':
+                    permission = ["Production trajectory"]
 
                 with st.sidebar:
                     st.image('images/UC_logo_horizontal.png', use_column_width=True)
@@ -93,22 +93,22 @@ def website():
                 if selected == "Supervisor":
                     supervisor_page()
 
-                if selected == "Production Planning":
+                if selected == "Production planning":
                     production_page()
 
-                if selected == "Assembly Process":
+                if selected == "Assembly process":
                     assembly_page()
 
-                if selected == "Logistics Operator":
+                if selected == "Logistics operator":
                     logistics_page()
 
-                if selected == 'Quality Control':
+                if selected == 'Quality control':
                     quality_page()
 
                 if selected == 'Expedition':
                     expedition_page()
 
-                if selected == 'Production Trajectory':
+                if selected == 'Production trajectory':
                     optimization_trajetory()
 
     if not authentication_status:
@@ -116,7 +116,7 @@ def website():
 
         st_autorefresh(limit=2, key='email_link')
         email = "samuel.moniz@dem.uc.pt"
-        subject = "Question: Lean Factory App"
+        subject = "Suport"
         body = "Please explain your doubt and we will answer as soon as possible. Thank you!"
 
         mailto_url = f"mailto:{email}?subject={subject}&body={body}"

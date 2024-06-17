@@ -7,8 +7,8 @@ def production_page():
     with c:
         update_timer()
 
-    st.title(":gray[Customer Orders]",
-             help='''\n This is where you can explore a detailed catalog of **Customer Orders**, 
+    st.title(":gray[Customer orders]",
+             help='''\n This is where you can explore a detailed catalog of **Customer orders**, 
             each meticulously documented with essential information, as presented in the 
             table below.
             \n At your disposal is the ability to meticulously curate the orders slated for 
@@ -55,8 +55,8 @@ def production_page():
         st.title("")
 
         # Display a message indicating where the selected orders will be produced
-        st.title(":grey[Orders Released]", help='''
-                \n The chosen orders will be displayed below, in **Orders Released** 
+        st.title(":grey[Orders released]", help='''
+                \n The chosen orders will be displayed below, in **Orders released** 
                 section. This platform provides the tools you need to stay organized and keep your 
                 production process on track.''')
 
@@ -103,8 +103,8 @@ def production_page():
         st.title("")
 
         # Display a message indicating where the selected orders will be produced
-        st.title(":grey[Orders Released]", help='''
-                \n The chosen orders will be displayed below, in **Orders Released** 
+        st.title(":grey[Orders released]", help='''
+                \n The chosen orders will be displayed below, in **Orders released** 
                 section. This platform provides the tools you need to stay organized and keep your 
                 production process on track.''')
 

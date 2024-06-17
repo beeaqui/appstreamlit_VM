@@ -54,7 +54,7 @@ def insert_logistics_orders(selected_rows):
     print("insert_logistics_orders selected_rows: \n", list(selected_rows))
 
     for row in selected_rows:
-        if row['Model'] == "Standard Cylinder":
+        if row['Model'] == "Standard cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
@@ -66,7 +66,7 @@ def insert_logistics_orders(selected_rows):
                                             "Quantity 9": row['Quantity'] * 2,
                                             })
 
-        if row['Model'] == "Push-in Cylinder":
+        if row['Model'] == "Push-in cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
@@ -78,7 +78,7 @@ def insert_logistics_orders(selected_rows):
                                             "Quantity 9": 0,
                                             })
 
-        if row['Model'] == "L-Fit Cylinder":
+        if row['Model'] == "L-fit cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
@@ -90,7 +90,7 @@ def insert_logistics_orders(selected_rows):
                                             "Quantity 9": 0,
                                             })
 
-        if row['Model'] == "Dual-Fit Cylinder":
+        if row['Model'] == "Dual-fit cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],

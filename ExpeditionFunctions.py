@@ -75,7 +75,7 @@ def display_tables_expedition():
                     f"border-radius: 10px; "
                     f"margin-top: 50px; "
                     f"margin-bottom: 10px;'>"
-                    f"Details - Customer Order {expedition_order['Customer Order']}</div>",
+                    f"Details - Customer order {expedition_order['Customer Order']}</div>",
                     unsafe_allow_html=True)
 
                 data = []
