@@ -76,13 +76,13 @@ def solution(coefficients, x_coefficients, y_coefficients, objective_coefficient
                              mode='markers', marker=dict(size=5), name='Trajectory'))
 
     # style updates
-    fig.update_layout(xaxis=dict(title='Standard Cylinder', range=[min(point[0] for point in vertices_polygon) - 2,
+    fig.update_layout(xaxis=dict(title='Standard cylinder', range=[min(point[0] for point in vertices_polygon) - 2,
                                  max(point[0] for point in vertices_polygon) + 2], title_font=dict(color='black'),
                                  tickfont=dict(color='black')),
                       yaxis=dict(title='Sensor Kit Cylinder', range=[min(point[1] for point in vertices_polygon) - 2,
                                  max(point[1] for point in vertices_polygon) + 2], title_font=dict(color='black'),
                                  tickfont=dict(color='black')),
-                      title='Linear Programming Problem',
+                      title='Linear programming problem',
                       )
 
     st.plotly_chart(fig)

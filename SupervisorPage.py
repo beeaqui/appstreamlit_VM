@@ -79,20 +79,20 @@ def supervisor_page():
     # update_timer()
 
     tab_bar_data = [
-        stx.TabBarItemData(id=1, title="Game Configurations", description=" "),
-        stx.TabBarItemData(id=2, title="Game Analysis", description=" "),
-        stx.TabBarItemData(id=3, title="Order Generation Status", description=" "),
-        stx.TabBarItemData(id=4, title="Cumulative Order Progress", description=" "),
-        stx.TabBarItemData(id=5, title="Quality Distribution", description=" "),
-        stx.TabBarItemData(id=6, title="Lead Time Analysis", description=" "),
-        stx.TabBarItemData(id=7, title="Workstation Distribution", description=" "),
-        stx.TabBarItemData(id=8, title="Linear Programming Problem", description=" ")
+        stx.TabBarItemData(id=1, title="Game configurations", description=" "),
+        stx.TabBarItemData(id=2, title="Game analysis", description=" "),
+        stx.TabBarItemData(id=3, title="Order generation status", description=" "),
+        stx.TabBarItemData(id=4, title="Cumulative order progress", description=" "),
+        stx.TabBarItemData(id=5, title="Quality distribution", description=" "),
+        stx.TabBarItemData(id=6, title="Lead time analysis", description=" "),
+        stx.TabBarItemData(id=7, title="Workstation distribution", description=" "),
+        stx.TabBarItemData(id=8, title="Linear programming problem", description=" ")
     ]
 
     chosen_id = stx.tab_bar(data=tab_bar_data, default=1)
 
     if chosen_id == "1":
-        st.subheader("Game Configurations", help='''\n Here you can set some configurations that will define the game. 
+        st.subheader("Game configurations", help='''\n Here you can set some configurations that will define the game. 
         Select the values for them to be accurate with the reality.''')
 
         client = MongoClient("mongodb://localhost:27017/")
