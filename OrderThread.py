@@ -14,7 +14,7 @@ keep_on_going_event = threading.Event()
 def update_delivery_date():
     try:
         # Read the CSV file into memory
-        with open('../appStreamlit/client_orders.csv', 'r') as file:
+        with open('../appstreamlit_VM/client_orders.csv', 'r') as file:
             reader = csv.DictReader(file)
             rows = list(reader)  # Read all rows into a list
     except Exception as e:
@@ -47,7 +47,7 @@ def update_delivery_date():
         updated_rows.append(row)
 
     # Write the updated data back to the CSV file
-    with open('../appStreamlit/client_orders.csv', 'w', newline='') as file:
+    with open('../appstreamlit_VM/client_orders.csv', 'w', newline='') as file:
         fieldnames = reader.fieldnames
         writer = csv.DictWriter(file, fieldnames=fieldnames)
 
@@ -66,7 +66,7 @@ def read_orders_from_csv():
     orders = []
     for document in cursor:
         if document['Game Phase'] == "Game 1":
-            with open('../appStreamlit/client_orders.csv', mode='r') as file:
+            with open('../appstreamlit_VM/client_orders.csv', mode='r') as file:
                 csv_reader = csv.DictReader(file)
 
                 for row in csv_reader:
@@ -86,7 +86,7 @@ def read_orders_from_csv():
                     return None
 
         elif document['Game Phase'] == "Game 2":
-            with open('../appStreamlit/client_orders.csv', mode='r') as file:
+            with open('../appstreamlit_VM/client_orders.csv', mode='r') as file:
                 csv_reader = csv.DictReader(file)
 
                 for row in csv_reader:
