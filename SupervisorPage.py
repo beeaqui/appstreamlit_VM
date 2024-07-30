@@ -186,6 +186,8 @@ def supervisor_page():
         metrics for an evolutionary analysis of the production line. \n Pay attention and discuss it with your 
         teammates.''')
 
+        calculate_delay_orders()
+
         c1, c2 = st.columns(2)
 
         with c1:

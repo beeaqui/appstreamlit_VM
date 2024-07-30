@@ -208,6 +208,45 @@ def connect_mongodb():
     return db
 
 
+def calculate_delay_orders():
+    db = connect_mongodb()
+    collection7 = db['ordersConcluded']
+    collection11 = db['TimeExpeditionEnd']
+
+    delivery_times = list(collection7.find({}))
+    expedition_times = list(collection11.find({}))
+
+    print('delivery_times', delivery_times)
+    print('expedition_times', expedition_times)
+
+    total_delay_orders = 0
+    without_delay = 0
+
+    for expedition_time in expedition_times:
+        for delivery_time in delivery_times:
+            if expedition_time['Orders Number'][0] == delivery_time['Number']:
+                print(expedition_time['Orders Number'][0], 'valor 1', ' end: ', expedition_time['End Expedition Time']['Time'])
+                print(delivery_time['Number'], 'valor 2', ' inicio: ', delivery_time['Delivery Date'])
+
+                dateformat = '%H:%M:%S'
+                start = delivery_time['Delivery Date'].replace(' h', ':00')
+
+                expedition_time_date = datetime.strptime(expedition_time['End Expedition Time']['Time'], dateformat)
+                print('expedition_time_date', expedition_time_date)
+                delivery_time_date = datetime.strptime(start, dateformat)
+                print('delivery_time_date' ,delivery_time_date)
+
+                if expedition_time_date > delivery_time_date:
+                    total_delay_orders += 1
+                else:
+                    without_delay += 1
+
+    st.write(f':blue[Total of orders on time: ] {without_delay}')
+    st.write(f':blue[Total of delayed orders: ] {total_delay_orders}')
+
+    return total_delay_orders, without_delay
+
+
 def find_finished_orders(db):
     connect_mongodb()
     collection7 = db['ordersConcluded']
