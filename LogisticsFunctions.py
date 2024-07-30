@@ -296,7 +296,7 @@ def display_images(game_phase):
     images = [
         'barrel.png', 'bearing_cap.png', 'push_L_fitting.png',
         'piston.png', 'end_cap.png', 'push_in_fitting.png',
-        'screw.png', 'nut.png', 'protection.png']
+        'screw.png', 'nut.png', 'swivel_flange.png']
 
     columns = st.columns(3, gap='medium')
 

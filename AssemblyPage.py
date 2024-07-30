@@ -16,8 +16,8 @@ def assembly_page():
     tab_bar_data = [
         stx.TabBarItemData(id=1, title="Standard cylinder", description=" "),
         stx.TabBarItemData(id=2, title="Push-in cylinder", description=" "),
-        stx.TabBarItemData(id=3, title="L-Fit cylinder", description=" "),
-        stx.TabBarItemData(id=4, title="Dual-Fit cylinder", description=" ")]
+        stx.TabBarItemData(id=3, title="L-fit cylinder", description=" "),
+        stx.TabBarItemData(id=4, title="Dual-fit cylinder", description=" ")]
 
     chosen_id = stx.tab_bar(data=tab_bar_data, default=1)
 
