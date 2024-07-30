@@ -51,7 +51,7 @@ def conf2(configuration2):
         collection16.insert_one({'High Priority': hours})
 
     else:
-        configuration_default = 0.5
+        configuration_default = 0.085
         collection16.insert_one({'High Priority': configuration_default})
 
 
@@ -71,7 +71,7 @@ def conf3(configuration3):
         collection17.insert_one({'Medium Priority': hours})
 
     else:
-        configuration_default = 1.0
+        configuration_default = 0.17
         collection17.insert_one({'Medium Priority': configuration_default})
 
 
@@ -173,12 +173,12 @@ def supervisor_page():
 
         st.caption("")
 
-        configuration2 = st.time_input(":blue[High priority orders value (HH-MM):]", value=datetime.time(0, 30))
+        configuration2 = st.time_input(":blue[High priority orders value (HH-MM):]", value=datetime.time(0, 5))
         conf2(configuration2)
 
         st.caption("")
 
-        configuration3 = st.time_input(":blue[Medium priority orders value (HH-MM):]", value=datetime.time(1, 0))
+        configuration3 = st.time_input(":blue[Medium priority orders value (HH-MM):]", value=datetime.time(0, 10))
         conf3(configuration3)
 
     if chosen_id == "2":

@@ -76,7 +76,7 @@ def solution(coefficients, x_coefficients, y_coefficients, objective_coefficient
                              mode='markers', marker=dict(size=5), name='Trajectory'))
 
     # style updates
-    fig.update_layout(xaxis=dict(title='Standard cylinder', range=[min(point[0] for point in vertices_polygon) - 2,
+    fig.update_layout(xaxis=dict(title='Complex cylinder', range=[min(point[0] for point in vertices_polygon) - 2,
                                  max(point[0] for point in vertices_polygon) + 2], title_font=dict(color='black'),
                                  tickfont=dict(color='black')),
                       yaxis=dict(title='Sensor Kit Cylinder', range=[min(point[1] for point in vertices_polygon) - 2,
@@ -208,7 +208,7 @@ def cumulative_finished_orders(db):
     collection13 = db['CumulativeOrdersFinished']
 
     cumulative_quantities = {
-        'Quantity Standard': 0,
+        'Quantity Complex': 0,
         'Quantity Sensor Kit': 0
     }
 
@@ -217,8 +217,8 @@ def cumulative_finished_orders(db):
     existing_orders = set(collection13.distinct("Number"))
 
     for order in finished_orders_list:
-        if order['Model'] == 'Standard':
-            cumulative_quantities['Quantity Standard'] += 1
+        if order['Model'] == 'Complex':
+            cumulative_quantities['Quantity Complex'] += 1
         elif order['Model'] == 'Sensor Kit':
             cumulative_quantities['Quantity Sensor Kit'] += 1
 
@@ -227,14 +227,14 @@ def cumulative_finished_orders(db):
             print(f"Order {order_number} already exists in collection13. Skipping...")
             continue
 
-        coordinates_x_y = (f"{cumulative_quantities['Quantity Standard']}, "
+        coordinates_x_y = (f"{cumulative_quantities['Quantity Complex']}, "
                            f"{cumulative_quantities['Quantity Sensor Kit']}")
 
         document = {
             "Number": order['Number'],
             "Reference": order['Reference'],
             "Model": order['Model'],
-            "Quantity Standard": cumulative_quantities['Quantity Standard'],
+            "Quantity Complex": cumulative_quantities['Quantity Complex'],
             "Quantity Sensor Kit": cumulative_quantities['Quantity Sensor Kit'],
             "Coordinates (x, y)": coordinates_x_y
         }
@@ -250,7 +250,7 @@ def trajectory(db):
     sensor_kit_coordinates = []
 
     for order in data:
-        standard_coordinates.append(order['Quantity Standard'])
+        standard_coordinates.append(order['Quantity Complex'])
         sensor_kit_coordinates.append(order['Quantity Sensor Kit'])
 
     return standard_coordinates, sensor_kit_coordinates

@@ -54,7 +54,7 @@ def insert_logistics_orders(selected_rows):
     print("insert_logistics_orders selected_rows: \n", list(selected_rows))
 
     for row in selected_rows:
-        if row['Model'] == "Standard cylinder":
+        if row['Model'] == "Complex cylinder":
             data = collection19.insert_one({"Production Order ID": release_id,
                                             "Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
@@ -63,7 +63,7 @@ def insert_logistics_orders(selected_rows):
                                             "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
                                             "Quantity 6": 0,
                                             "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
-                                            "Quantity 9": row['Quantity'] * 2,
+                                            "Quantity 9": row['Quantity'],
                                             })
 
         if row['Model'] == "Push-in cylinder":

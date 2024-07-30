@@ -24,7 +24,7 @@ def update_delivery_date():
     updated_rows = []
     for row in rows:
         # Generate random delivery date within the next 120 minutes
-        product_delivery_date = datetime.datetime.now() + datetime.timedelta(minutes=random.randint(1, 120))
+        product_delivery_date = datetime.datetime.now() + datetime.timedelta(minutes=random.randint(1, 30))
         delivery_date = product_delivery_date.strftime('%H:%M') + ' h'
 
         # Calculate time gap between current time and delivery date

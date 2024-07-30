@@ -14,7 +14,7 @@ def assembly_page():
     display_images(game_phase)
 
     tab_bar_data = [
-        stx.TabBarItemData(id=1, title="Standard cylinder", description=" "),
+        stx.TabBarItemData(id=1, title="Complex cylinder", description=" "),
         stx.TabBarItemData(id=2, title="Push-in cylinder", description=" "),
         stx.TabBarItemData(id=3, title="L-fit cylinder", description=" "),
         stx.TabBarItemData(id=4, title="Dual-fit cylinder", description=" ")]

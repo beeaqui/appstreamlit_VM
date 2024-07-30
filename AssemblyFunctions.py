@@ -29,7 +29,7 @@ def basic_cylinder_operations():
         {'Operation': 'G', 'Description': 'Insert screw number three'},
         {'Operation': 'H', 'Description': 'Insert screw number four'},
         {'Operation': 'I', 'Description': 'Screw in the nut in the piston rod'},
-        {'Operation': 'J', 'Description': 'Insert the two protections in the air ports'}
+        {'Operation': 'J', 'Description': 'Insert the swivel flange and connect it to the section.'}
     ]
 
     df = pd.DataFrame(tab_data)
