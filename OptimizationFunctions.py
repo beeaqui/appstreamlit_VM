@@ -88,7 +88,7 @@ def solution(coefficients, x_coefficients, y_coefficients, objective_coefficient
     st.plotly_chart(fig)
 
 
-def find_intersections(coefficients, x_coefficients, y_coefficients):
+def find_intersections_trajectory(coefficients, x_coefficients, y_coefficients):
     intersections = []
 
     for i in range(len(coefficients)):
@@ -130,7 +130,7 @@ def find_intersections(coefficients, x_coefficients, y_coefficients):
     return vertices_polygon
 
 
-def LinearProgrammingExample(coefficients, x_coefficients, y_coefficients, signs, objective_coefficients):
+def linear_programming_trajectory(coefficients, x_coefficients, y_coefficients, signs, objective_coefficients):
     solver = pywraplp.Solver.CreateSolver("GLOP")
     if not solver:
         return
@@ -177,7 +177,7 @@ def LinearProgrammingExample(coefficients, x_coefficients, y_coefficients, signs
         # print(f"Problem solved in {solver.wall_time():d} milliseconds")
         # print(f"Problem solved in {solver.iterations():d} iterations")
 
-        vertices_polygon = find_intersections(coefficients, x_coefficients, y_coefficients)
+        vertices_polygon = find_intersections_trajectory(coefficients, x_coefficients, y_coefficients)
         solution(coefficients, x_coefficients, y_coefficients, objective_coefficients, vertices_polygon, signs)
 
     else:

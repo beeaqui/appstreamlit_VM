@@ -8,12 +8,18 @@ from OptimizationPage import *
 from SignUp import *
 from LogisticsPage import *
 
+import time
+
 from streamlit_option_menu import option_menu
 from streamlit_authenticator import Authenticate
 from streamlit_autorefresh import st_autorefresh
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
+
+
+def unique_key(page_name):
+    return f"{page_name}_{int(time.time())}"
 
 
 # Define a function named 'website' where it is all the design part of the application
@@ -31,17 +37,24 @@ def website():
         c1, c2, c3 = st.columns(3)
         with c2:
             st.image('images/UC_logo.png')
-        st.write("Welcome to Your Application. Please Login to Continue."
-                 "Welcome to Your Application. Please Login to Continue."
-                 "Welcome to Your Application. Please Login to Continue."
-                 "Welcome to Your Application. Please Login to Continue."
-                 "Welcome to Your Application. Please Login to Continue."
-                 "Welcome to Your Application. Please Login to Continue."
-                 "Welcome to Your Application. Please Login to Continue.")
 
-        st.caption('')
+        st.write(
+            "<div style='text-align: center;'>"
+            "<strong style='color: #003366;'>Welcome to the UC Factory Lab Optimizer!</strong><br><br>"
+            "</div>"
+            "<div style='text-align: left;'>"
+            "This app enhances your experience within the UC Factory Lab, where hands-on learning meets cutting-edge "
+            "industrial technology. By streamlining production tasks, our app allows you to efficiently interact with "
+            "the assembly line, working seamlessly with robots and advanced systems to perform assembly and other "
+            "tasks. Leverage the principles of Lean Manufacturing and Continuous Improvement as you engage in "
+            "real-world production scenarios. Enjoy a smarter, more efficient assembly process with the UC Factory "
+            "Lab Optimizer.<br><br>"
+            "</div>",
+            unsafe_allow_html=True)
+
         organization = st.text_input(f":blue[**Insert your organization**]", key='org')
-        st_autorefresh(limit=2, key='log in')
+        key = unique_key('login')
+        st_autorefresh(limit=10, interval=15000, key='key')
 
     authenticator = Authenticate(credentials, cookie_name='Streamlit', cookie_key='key', cookie_expiry_days=4)
 
@@ -91,10 +104,12 @@ def website():
                     authenticator.logout('Log Out', 'sidebar')
 
                 if selected == "Supervisor":
+                    key = unique_key('supervisor')
+                    st_autorefresh(limit=50, interval=15000, key='supervisor')
                     supervisor_page()
 
                 if selected == "Production planning":
-                    production_page()
+                    production_page(db)
 
                 if selected == "Assembly process":
                     assembly_page()
@@ -103,20 +118,26 @@ def website():
                     logistics_page()
 
                 if selected == 'Quality control':
+                    key = unique_key('quality')
+                    st_autorefresh(limit=50, interval=15000, key='quality')
                     quality_page()
 
                 if selected == 'Expedition':
+                    key = unique_key('expedition')
+                    st_autorefresh(limit=50, interval=15000, key='expedition')
                     expedition_page()
 
                 if selected == 'Production trajectory':
-                    optimization_trajetory()
+                    key = unique_key('trajectory')
+                    st_autorefresh(limit=50, interval=15000, key='trajectory')
+                    optimization_trajectory()
 
     if not authentication_status:
         st.session_state.logged_in = False
 
         st_autorefresh(limit=2, key='email_link')
         email = "samuel.moniz@dem.uc.pt"
-        subject = "Suport"
+        subject = "Support"
         body = "Please explain your doubt and we will answer as soon as possible. Thank you!"
 
         mailto_url = f"mailto:{email}?subject={subject}&body={body}"

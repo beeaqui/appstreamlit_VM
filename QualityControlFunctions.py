@@ -16,7 +16,7 @@ def find_quality_rows(db):
     collection3 = db['qualityOrders']
 
     # Select all variables from the orders except for id
-    data_quality_list = collection3.find({}, {'_id': 0, 'Production Order ID': 1, 'Number': 1, 'Order Line': 1,
+    data_quality_list = collection3.find({}, {'_id': 0, 'Number': 1, 'Order Line': 1,
                                               'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
                                               'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
@@ -30,16 +30,14 @@ def delete_quality_order(db, order_number):
 
 def approved_quality_order(db, order_number):
     collection4 = db['qualityApproved']
-    collection4.insert_one({"Production Order ID": order_number['Production ID'],
-                            'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
+    collection4.insert_one({'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
                             'Reference': order_number['Product Ref.'], 'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})
 
     collection6 = db['expeditionOrders']
-    collection6.insert_one({"Production Order ID": order_number['Production ID'],
-                            'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
+    collection6.insert_one({'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
                             'Reference': order_number['Product Ref.'], 'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
@@ -48,8 +46,7 @@ def approved_quality_order(db, order_number):
 
 def disapproved_quality_order(db, order_number):
     collection5 = db['qualityDisapproved']
-    collection5.insert_one({"Production Order ID": order_number['Production ID'],
-                            'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
+    collection5.insert_one({'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
                             'Reference': order_number['Product Ref.'], 'Delivery Date': order_number['Delivery Date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
@@ -65,12 +62,11 @@ def quality_checks():
     rows_df = pd.DataFrame(list(quality_rows))
 
     if 'Quantity' in rows_df.columns:
-        columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
+        columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
                    'Description', 'Color', 'Dimensions']
         rows_df = rows_df.reindex(columns=columns)
 
     rows_df = rows_df.rename(columns={
-        "Production Order ID": 'Production ID',
         'Number': 'Customer Order',
         'Reference': 'Product Ref.'
     })
@@ -105,8 +101,8 @@ def quality_checks():
 
                 st.dataframe(data_frame, hide_index=True, use_container_width=True)
                 c1, c2 = st.columns(2)
-                with c1:
 
+                with c1:
                     approve = st.button('Approve', key=f"button_approve{quality_order['Customer Order']}",
                                         use_container_width=True)
                     st.markdown(

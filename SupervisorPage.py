@@ -1,11 +1,17 @@
 import extra_streamlit_components as stx
+from streamlit_autorefresh import st_autorefresh
+
 from OrderThread import *
 from SupervisorFunctions import *
-from ProductionPlanningFunctions import reset_release_id
+from ProductionPlanningFunctions import *
 import datetime
 
+width1 = 320
+width2 = 320
+width3 = 500
 
-def game_conf(game_option):
+
+def game_phase_config(game_option):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection18 = db['GamePhaseConfig']
@@ -17,6 +23,14 @@ def game_conf(game_option):
 
     else:
         collection18.update_one({}, {'$set': {'Game Phase': None}}, upsert=True)
+
+
+def game_mode_config(game_mode):
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection24 = db['GameStartStop']
+
+    collection24.update_one({}, {'$set': {'Game Mode': game_mode}}, upsert=True)
 
 
 def conf1(configuration1):
@@ -76,7 +90,8 @@ def conf3(configuration3):
 
 
 def supervisor_page():
-    # update_timer()
+
+    update_timer()
 
     tab_bar_data = [
         stx.TabBarItemData(id=1, title="Game configurations", description=" "),
@@ -86,7 +101,8 @@ def supervisor_page():
         stx.TabBarItemData(id=5, title="Quality distribution", description=" "),
         stx.TabBarItemData(id=6, title="Lead time analysis", description=" "),
         stx.TabBarItemData(id=7, title="Workstation distribution", description=" "),
-        stx.TabBarItemData(id=8, title="Linear programming problem", description=" ")
+        stx.TabBarItemData(id=8, title="Order delivery status", description=" "),
+        stx.TabBarItemData(id=9, title="Linear programming problem", description=" ")
     ]
 
     chosen_id = stx.tab_bar(data=tab_bar_data, default=1)
@@ -114,7 +130,7 @@ def supervisor_page():
         game_option = st.selectbox(label=':blue[Select the game phase in order to proceed]',
                                    options=options, key='game_options', index=initial_index,
                                    placeholder="Choose the game phase")
-        game_conf(game_option)
+        game_phase_config(game_option)
 
         c1, c2, c3, c4 = st.columns(4)
         with c3:
@@ -123,7 +139,9 @@ def supervisor_page():
                                    use_container_width=True)
             if clear_game:
                 semaphore()
-                reset_release_id()
+                game_mode_config('Clear')
+                st_autorefresh(limit=2, key='key2')
+
                 db['ordersCollection'].drop()
                 db['selectedOrders'].drop()
                 db['qualityOrders'].drop()
@@ -145,26 +163,30 @@ def supervisor_page():
                 db['LogisticsOrdersProcess'].drop()
                 db['AssemblyOrders'].drop()
                 db['AssemblyOrdersProcess'].drop()
+                db['SaveOrdersLogistics'].drop()
 
         with c1:
             create_orders_button = st.button('Start game', key='create_orders', type='primary',
-                                             help='Start Generating Orders',
+                                             help='Start generating orders',
                                              use_container_width=True)
-
-        with c2:
-            stop_orders_button = st.button('Stop game', key='stop_orders_button', type='primary',
-                                           help='Stop Generating Orders',
-                                           use_container_width=True)
 
         collection1 = db['ordersCollection']
 
         if create_orders_button:
-            reset_release_id()
             collection1.drop()
             start_thread()
+            game_mode_config('Start')
+            st_autorefresh(limit=2, key='key2')
+
+        with c2:
+            stop_orders_button = st.button('Stop game', key='stop_orders_button', type='primary',
+                                           help='Stop generating orders',
+                                           use_container_width=True)
 
         if stop_orders_button:
             semaphore()
+            game_mode_config('Stop')
+            st_autorefresh(limit=2, key='key3')
 
         st.caption("")
         configuration1 = st.number_input(":blue[Insert the time (in seconds) for the interval of orders generation:]",
@@ -182,35 +204,31 @@ def supervisor_page():
         conf3(configuration3)
 
     if chosen_id == "2":
-        st.subheader("Game Analysis", help='''\n This analysis provides important information related  various 
+        st.subheader("Game analysis", help='''\n This analysis provides important information related  various 
         metrics for an evolutionary analysis of the production line. \n Pay attention and discuss it with your 
         teammates.''')
-
-        calculate_delay_orders()
 
         c1, c2 = st.columns(2)
 
         with c1:
-            width1 = 320
             plot_generated_orders(width1)
 
         with c2:
-            width2 = 350
             wip_plot(width2)
 
         with c1:
-            width3 = 320
-            quality_distribution(width3)
+            quality_distribution_plot(width1)
 
         with c2:
-            width4 = 350
-            leadtime(width4)
+            leadtime_plot(width2)
 
         with c1:
-            width5 = 320
-            orders_distribution(width5)
+            orders_distribution_plot(width1)
 
         with c2:
+            calculate_delay_orders(width2)
+
+        with c1:
             x_coefficients = [16.0, 18.0, 16.0, 11.0, 0.0, 1.0]
             y_coefficients = [23.0, 18.0, 14.0, 16.0, 1.0, 0.0]
             signs = ["<=", "<=", "<=", "<=", ">=", ">="]
@@ -218,32 +236,28 @@ def supervisor_page():
             objective_x = 3.0
             objective_y = 4.0
 
-            width6 = 350
-            result = LinearProgrammingExample(coefficients, x_coefficients, y_coefficients, signs,
-                                              [objective_x, objective_y], width6)
+            result = linear_programming_trajectory(coefficients, x_coefficients, y_coefficients, signs,
+                                                   [objective_x, objective_y], width1)
 
     if chosen_id == "3":
-        width1 = 500
-        plot_generated_orders(width1)
+        plot_generated_orders(width3)
 
     if chosen_id == "4":
-        width2 = 500
-        wip_plot(width2)
+        wip_plot(width3)
 
     if chosen_id == "5":
-        width3 = 500
-        quality_distribution(width3)
+        quality_distribution_plot(width3)
 
     if chosen_id == "6":
-        width4 = 500
-        leadtime(width4)
+        leadtime_plot(width3)
 
     if chosen_id == "7":
-        width5 = 500
-        orders_distribution(width5)
+        orders_distribution_plot(width3)
 
     if chosen_id == "8":
-        width6 = 500
+        calculate_delay_orders(width3)
+
+    if chosen_id == "9":
         x_coefficients = [16.0, 18.0, 16.0, 11.0, 0.0, 1.0]
         y_coefficients = [23.0, 18.0, 14.0, 16.0, 1.0, 0.0]
         signs = ["<=", "<=", "<=", "<=", ">=", ">="]
@@ -251,5 +265,5 @@ def supervisor_page():
         objective_x = 3.0
         objective_y = 4.0
 
-        result = LinearProgrammingExample(coefficients, x_coefficients, y_coefficients, signs,
-                                          [objective_x, objective_y], width6)
+        result = linear_programming_trajectory(coefficients, x_coefficients, y_coefficients, signs,
+                                               [objective_x, objective_y], width3)

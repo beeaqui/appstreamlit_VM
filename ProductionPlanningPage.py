@@ -1,8 +1,11 @@
 from ProductionPlanningFunctions import *
 from LogisticsFunctions import *
 
+client = MongoClient("mongodb://localhost:27017/")
+db = client['local']
 
-def production_page():
+
+def production_page(db):
     c = st.container()
     with c:
         update_timer()
@@ -17,8 +20,6 @@ def production_page():
 
     st.write("")
 
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['local']
     collection1 = db['ordersCollection']
 
     count1 = collection1.count_documents({})
@@ -49,7 +50,6 @@ def production_page():
                 collection14.drop()
 
                 insert_datetime_selected_rows(selected_rows)
-                increment_release_id()
 
                 st_autorefresh(limit=2, key=f'{selected_rows}')
         st.title("")
@@ -62,8 +62,6 @@ def production_page():
 
         st.caption("")
 
-        client = MongoClient("mongodb://localhost:27017/")
-        db = client['local']
         collection2 = db['selectedOrders']
         count = collection2.count_documents({})
 
@@ -110,8 +108,6 @@ def production_page():
 
         st.caption("")
 
-        client = MongoClient("mongodb://localhost:27017/")
-        db = client['local']
         collection2 = db['selectedOrders']
         count = collection2.count_documents({})
 

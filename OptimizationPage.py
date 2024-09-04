@@ -1,7 +1,7 @@
 from OptimizationFunctions import *
 
 
-def optimization_trajetory():
+def optimization_trajectory():
     st.title("Linear Programming Model")
 
     st.write("**Constraints:** ax + bx = c")
@@ -95,7 +95,8 @@ def optimization_trajetory():
     y_coefficients = [float(value) for value in y_coefficients]
     signs = [str(value) for value in signs]
 
-    result = LinearProgrammingExample(coefficients, x_coefficients, y_coefficients, signs, [objective_x, objective_y])
+    result = linear_programming_trajectory(coefficients, x_coefficients, y_coefficients, signs,
+                                           [objective_x, objective_y])
 
     # print("x_coefficients", x_coefficients)
     # print("y_coefficients", y_coefficients)

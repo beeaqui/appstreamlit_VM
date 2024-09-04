@@ -17,7 +17,6 @@ from reportlab.lib import colors
 # import webbrowser
 # import streamlit_pdf_viewer as st_pdf
 
-release_id = 1
 game_phase = ''
 
 
@@ -25,38 +24,32 @@ def insert_selected_rows(selected_rows):
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection2 = db['selectedOrders']
+    collection23 = db['SaveOrdersLogistics']
 
     for row in selected_rows:
         selected_orders = collection2.insert_one(
-            {'Production Order ID': release_id, 'Number': row['Customer Order'], 'Order Line': row['Order Line'],
+            {'Number': row['Customer Order'], 'Order Line': row['Order Line'],
+             'Reference': row['Product Ref.'],
+             'Delivery Date': row['Delivery Date'], 'Time Gap': row['Time Gap'],
+             'Description': row['Description'], 'Model': row['Model'], 'Quantity': row['Quantity'],
+             'Color': row['Color'], 'Dimensions': row['Dimensions']})
+
+        logistics_save = collection23.insert_one(
+            {'Number': row['Customer Order'], 'Order Line': row['Order Line'],
              'Reference': row['Product Ref.'],
              'Delivery Date': row['Delivery Date'], 'Time Gap': row['Time Gap'],
              'Description': row['Description'], 'Model': row['Model'], 'Quantity': row['Quantity'],
              'Color': row['Color'], 'Dimensions': row['Dimensions']})
 
 
-def reset_release_id():
-    global release_id
-    release_id = 1
-
-
-def increment_release_id():
-    global release_id
-    release_id += 1
-
-
 def insert_logistics_orders(selected_rows):
-    global release_id
-
     client = MongoClient("mongodb://localhost:27017/")
     db = client['local']
     collection19 = db['LogisticsOrders']
-    print("insert_logistics_orders selected_rows: \n", list(selected_rows))
 
     for row in selected_rows:
         if row['Model'] == "Complex cylinder":
-            data = collection19.insert_one({"Production Order ID": release_id,
-                                            "Order Number": row['Customer Order'],
+            data = collection19.insert_one({"Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": 0,
@@ -67,8 +60,7 @@ def insert_logistics_orders(selected_rows):
                                             })
 
         if row['Model'] == "Push-in cylinder":
-            data = collection19.insert_one({"Production Order ID": release_id,
-                                            "Order Number": row['Customer Order'],
+            data = collection19.insert_one({"Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": 0,
@@ -79,8 +71,7 @@ def insert_logistics_orders(selected_rows):
                                             })
 
         if row['Model'] == "L-fit cylinder":
-            data = collection19.insert_one({"Production Order ID": release_id,
-                                            "Order Number": row['Customer Order'],
+            data = collection19.insert_one({"Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": row['Quantity'] * 2,
@@ -91,8 +82,7 @@ def insert_logistics_orders(selected_rows):
                                             })
 
         if row['Model'] == "Dual-fit cylinder":
-            data = collection19.insert_one({"Production Order ID": release_id,
-                                            "Order Number": row['Customer Order'],
+            data = collection19.insert_one({"Order Number": row['Customer Order'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": row['Quantity'],
@@ -304,182 +294,128 @@ def create_grid():
 
 
 def update_timer():
-    html_code = """
-    <style>
-        .st-emotion-cache-wk66hx {
-            display: inline-flex;
-            -webkit-box-align: center;
-            align-items: center;
-            -webkit-box-pack: center;
-            justify-content: center;
-            font-weight: 400;
-            padding: 0.25rem 0.75rem;
-            border-radius: 0.5rem;
-            min-height: 38.4px;
-            margin: 0px;
-            line-height: 1.6;
-            color: rgb(49, 51, 63);
-            width: auto;
-            user-select: none;
-            background-color: rgb(255, 255, 255);
-            border: 1px solid rgb(49, 51, 63, 0.2);
-        }
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client['local']
+    collection24 = db['GameStartStop']
 
-        .st-emotion-cache-wk66hx:selected {
-            background-color: rgb(49, 90, 146);
-            color: rgb(49, 90, 146)
-        }
+    document = collection24.find_one()
+    if document:
+        game_mode = document.get('Game Mode')
 
-        .st-emotion-cache-wk66hx:hover {
-            border: 1px solid rgb(49, 90, 146);
-            color: rgb(49, 90, 146)
-        }
+        start_timer_js = ""
+        pause_timer_js = ""
 
-        .st-emotion-cache-wk66hx:active {
-            background-color: rgb(49, 90, 146);
-            color: rgb(255, 255, 255)
-        }   
-    </style>
-
-    <body>
-        <div style="font-size: 1.4rem; color: #333; font-family: 'Verdana', sans-serif;">
-            <span style="font-weight: bold; color: rgb(85,88,103);">Timer: </span>
-            <span id="timer" style="font-weight: bold; color: rgb(49, 90, 146);">00:00:00</span>
-            <button id="startButton" class="st-emotion-cache-wk66hx">START</button>
-            <button id="pauseButton" class="st-emotion-cache-wk66hx" disabled>PAUSE</button>
-        </div>
-
-         <script>
-            var seconds = 0;
-            var timerInterval;
-            var paused = true;
-
-            var startButton = document.getElementById("startButton");
-            var pauseButton = document.getElementById("pauseButton");
-
-            startButton.addEventListener("click", function () {
-                if (paused && pauseButton.innerText != "RESUME" && startButton.innerText == "START") {
-                    paused = false;
-                    startButton.innerText = "RESET";
-                    pauseButton.disabled = false;
+        # If game_mode is "Start", reset and then start the timer
+        if game_mode == "Start":
+            start_timer_js = """
                     startTimer();
-                } else {
-                    resetTimer();
-                }
-            });
+                """
 
-            pauseButton.addEventListener("click", function () {
-                if (paused) {
-                    pauseButton.innerText = "PAUSE";
-                    resumeTimer();
-                } else {
-                    pauseButton.innerText = "RESUME";
+        # If game_mode is "Stop", pause the timer
+        elif game_mode == "Stop":
+            pause_timer_js = """
                     pauseTimer();
-                }
-            });
+                """
 
-            function startTimer() {
-                document.cookie = 'startButtonText=' + startButton.innerText + '; path=/; domain=localhost';
-                document.cookie = 'pauseButtonText=' + pauseButton.innerText + '; path=/; domain=localhost';
+        elif game_mode == "Clear":
+            start_timer_js = """
+                    resetTimer();
+                """
 
-                timerInterval = setInterval(function () {
-                    seconds++;
-                    updateTimer();
-                }, 1000);
+        html_code = f"""
+                <style>
+                    .st-emotion-cache-wk66hx {{
+                        display: inline-flex;
+                        -webkit-box-align: center;
+                        align-items: center;
+                        -webkit-box-pack: center;
+                        justify-content: center;
+                        font-weight: 400;
+                        padding: 0.25rem 0.75rem;
+                        border-radius: 0.5rem;
+                        min-height: 38.4px;
+                        margin: 0px;
+                        line-height: 1.6;
+                        color: rgb(49, 51, 63);
+                        width: auto;
+                        user-select: none;
+                        background-color: rgb(255, 255, 255);
+                        border: 1px solid rgb(49, 51, 63, 0.2);
+                    }}
+                </style>
+    
+                <body>
+                    <div style="font-size: 1.4rem; color: #333; font-family: 'Verdana', sans-serif;">
+                        <span style="font-weight: bold; color: rgb(85,88,103);">Timer: </span>
+                        <span id="timer" style="font-weight: bold; color: rgb(49, 90, 146);">00:00:00</span>
+                    </div>
+    
+                    <script>
+                        var seconds = 0;
+                        var timerInterval;
+                        var paused = true;
+    
+                        function startTimer() {{
+                            if (!paused) return; // If already running, do nothing
+                            paused = false;
+                            timerInterval = setInterval(function () {{
+                                seconds++;
+                                updateTimer();
+                            }}, 1000);
+                        }}
+    
+                        function pauseTimer() {{
+                            clearInterval(timerInterval);
+                            paused = true;
+                            document.cookie = 'paused=true; path=/; domain=localhost';
+                        }}
+    
+                        function resetTimer() {{
+                            clearInterval(timerInterval);
+                            seconds = 0;
+                            paused = true;
+                            updateTimer();
+                        }}
+    
+                        function updateTimer() {{
+                            var hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                            var minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                            var secs = (seconds % 60).toString().padStart(2, '0');
+                            var timeString = hours + ':' + minutes + ':' + secs;
+                            document.cookie = 'myClock=' + timeString + '; path=/; domain=localhost';
+                            document.getElementById("timer").innerHTML = timeString;
+                        }}
+    
+                        document.addEventListener("DOMContentLoaded", function () {{
+                            var cookies = document.cookie.split(';');
+                            var isPaused = false;
+    
+                            for (var i = 0; i < cookies.length; i++) {{
+                                var cookie = cookies[i].trim();
+                                if (cookie.startsWith('paused=')) {{
+                                    isPaused = cookie.substring('paused='.length, cookie.length) === 'true';
+                                }}
+                                if (cookie.startsWith('myClock=')) {{
+                                    var clockCurrentValue = cookie.substring('myClock='.length, cookie.length);
+                                    var timeParts = clockCurrentValue.split(':');
+                                    seconds = parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
+                                }}
+                            }}
+    
+                            updateTimer(); // Update the timer display with the current time
+    
+                            if (!isPaused) {{
+                                startTimer(); // Continue the timer if it wasn't paused
+                            }}
+    
+                            {start_timer_js}
+                            {pause_timer_js}
+                        }});
+                    </script>
+                </body>
+            """
 
-            }
-
-            function pauseTimer() {
-                clearInterval(timerInterval);
-                paused = true;
-                document.cookie = 'paused=' + paused + '; path=/; domain=localhost';
-                document.cookie = 'startButtonText=' + startButton.innerText + '; path=/; domain=localhost';
-                document.cookie = 'pauseButtonText=' + pauseButton.innerText + '; path=/; domain=localhost';
-            }
-
-            function resumeTimer() {
-                startTimer();
-                paused = false;
-                document.cookie = 'paused=' + paused + '; path=/; domain=localhost';
-                document.cookie = 'startButtonText=' + startButton.innerText + '; path=/; domain=localhost';
-                document.cookie = 'pauseButtonText=' + pauseButton.innerText + '; path=/; domain=localhost';
-            }
-
-            function resetTimer() {
-                clearInterval(timerInterval);
-                seconds = 0;
-                paused = true;
-                updateTimer();
-                startButton.innerText = "START";
-                pauseButton.innerText = "PAUSE";
-                pauseButton.disabled = true;
-                document.cookie = 'startButtonText=' + startButton.innerText + '; path=/; domain=localhost';
-                document.cookie = 'pauseButtonText=' + pauseButton.innerText + '; path=/; domain=localhost';
-            }
-
-            function updateTimer() {
-                var hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
-                var minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-                var secs = (seconds % 60).toString().padStart(2, '0');
-                var timeString = hours + ':' + minutes + ':' + secs;
-                document.cookie = 'myClock=' + timeString + '; path=/; domain=localhost';
-                document.cookie = 'paused=' + paused + '; path=/; domain=localhost';
-
-                document.getElementById("timer").innerHTML = timeString;
-            }
-
-            document.addEventListener("DOMContentLoaded", function () {
-                var cookies = document.cookie.split(';');
-
-                var isMyClock = false;
-                var isPaused = false;
-                var isStartButtonText = false;
-                var isPauseButtonText = false;
-
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-
-                    if (cookie.startsWith('myClock=')) {
-                        isMyClock = true;
-                        clockCurrentValue = cookie.substring('myClock='.length, cookie.length);
-                        var timeParts = clockCurrentValue.split(':');
-                        seconds = parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
-                    } else if (cookie.startsWith('paused=')) {
-                        isPaused = true;
-                        paused = cookie.substring('paused='.length, cookie.length) === 'true';
-                    } else if (cookie.startsWith('startButtonText=')) {
-                        isStartButtonText = true;
-                        startButton.innerText = cookie.substring('startButtonText='.length, cookie.length);
-                        if(startButton.innerText != "START"){
-                            pauseButton.disabled = false;
-                        }
-                    } else if (cookie.startsWith('pauseButtonText=')) {
-                        isPauseButtonText = true;
-                        pauseButton.innerText = cookie.substring('pauseButtonText='.length, cookie.length);
-                    }
-                }
-
-                if(isMyClock && isPaused){
-                    if(!paused){
-                        startTimer();
-                    }
-                    else{
-                        updateTimer();
-                    }
-                }
-                else{
-                    paused = true;
-                    seconds = 0;
-                    startButton.innerText = 'START';
-                    pauseButton.innerText = 'PAUSE';
-                    updateTimer();
-                }
-            });
-        </script>
-    </body>
-    """
-
-    st.components.v1.html(html_code, height=50)
+        st.components.v1.html(html_code, height=50)
 
 
 def find_selected_rows():
@@ -487,7 +423,7 @@ def find_selected_rows():
     db = client['local']
     collection2 = db['selectedOrders']
 
-    data_selected_rows = collection2.find({}, {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Order Line': 1,
+    data_selected_rows = collection2.find({}, {'_id': 0, 'Number': 1, 'Order Line': 1,
                                                'Reference': 1,
                                                'Delivery Date': 1, 'Time Gap': 1, 'Description': 1, 'Model': 1,
                                                'Quantity': 1, 'Color': 1, 'Dimensions': 1})
@@ -507,19 +443,17 @@ def create_grid_selected_rows():
         rows_df = rows_df.drop(columns=['Dimensions'])
 
     if 'Quantity' in rows_df.columns:
-        columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
+        columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
                    'Description']
         rows_df = rows_df.reindex(columns=columns)
 
     rows_df = rows_df.rename(columns={
-        "Production Order ID": 'Production ID',
         'Number': 'Customer Order',
         'Reference': 'Product Ref.'
     })
 
     data_frame_selected_rows = st.dataframe(rows_df,
                                             column_config={
-                                                "Production ID": 'Production ID',
                                                 "Customer Order": "Customer Order",
                                                 "Order Line": "Order Line",
                                                 'Product Ref.': "Product Ref.",

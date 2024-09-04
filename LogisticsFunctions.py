@@ -13,24 +13,23 @@ game2_list = []
 # Database connection
 client = MongoClient("mongodb://localhost:27017/")
 db = client['local']
-collection2 = db['selectedOrders']
 collection18 = db['GamePhaseConfig']
 collection19 = db['LogisticsOrders']
 collection20 = db['LogisticsOrdersProcess']
 collection21 = db['AssemblyOrders']
 collection22 = db['AssemblyOrdersProcess']
+collection23 = db['SaveOrdersLogistics']
 
 
 def find_logistics_orders():
-    data_logistics_orders = collection2.find({}, {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Order Line': 1,
-                                                  'Reference': 1, 'Delivery Date': 1, 'Time Gap': 1, 'Description': 1,
-                                                  'Model': 1, 'Quantity': 1, 'Color': 1, 'Dimensions': 1})
+    data_logistics_orders = collection23.find({}, {'_id': 0, 'Number': 1, 'Order Line': 1,
+                                                   'Reference': 1, 'Delivery Date': 1, 'Time Gap': 1, 'Description': 1,
+                                                   'Model': 1, 'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
     for row in data_logistics_orders:
         if not collection20.find_one({'Number': row['Number'], 'Reference': row['Reference']}):
             collection20.insert_one(
-                {"Production Order ID": row['Production Order ID'],
-                 'Number': row['Number'], 'Order Line': row['Order Line'], 'Reference': row['Reference'],
+                {'Number': row['Number'], 'Order Line': row['Order Line'], 'Reference': row['Reference'],
                  'Delivery Date': row['Delivery Date'],
                  'Description': row['Description'], 'Model': row['Model'],
                  'Quantity': row['Quantity'], 'Color': row['Color'], 'Dimensions': row['Dimensions']}
@@ -47,7 +46,7 @@ def fetch_order_info():
 
     search = collection19.find_one()
     if search:
-        id_game1 = search["Production Order ID"]
+        id_game1 = search["Order Number"]
         id_game2 = search["Order Number"]
 
     count = collection19.count_documents({})
@@ -57,10 +56,10 @@ def fetch_order_info():
 
     with st.container(border=True):
         if game_phase == "Game 1":
-            st.write(f':blue[Next production order to pick: ] {id_game1}')
+            st.write(f':blue[Next order to pick: ] {id_game1}')
 
         if game_phase == "Game 2":
-            st.write(f':blue[Next production order to pick: ] {id_game2}')
+            st.write(f':blue[Next order to pick: ] {id_game2}')
 
     return game_phase, id_game1, id_game2
 
@@ -74,7 +73,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
         if start:
             if game_phase == "Game 1":
-                orders = collection19.find({"Production Order ID": id_game1})
+                orders = collection19.find({"Order Number": id_game1})
                 quantities = [0] * 9
                 for order in orders:
                     for i in range(9):
@@ -82,23 +81,44 @@ def handle_buttons(game_phase, id_game1, id_game2):
                         quantities[i] += order.get(quantity_key, 0)
 
                 game1_label = id_game1
-                game1_number_search = collection19.find({'Production Order ID': game1_label},
+                game1_number_search = collection19.find({'Order Number': game1_label},
                                                         {'_id': 0, 'Order Number': 1})
 
                 game1_list = list(game1_number_search)
 
+                find_for_assembly = collection19.find({'Order Number': game1_label},
+                                                      {'_id': 0, 'Order Number': 1, 'Quantity': 1, 'Model': 1})
+
+                for doc in find_for_assembly:
+                    collection21.insert_one(doc)
+
+                collection19.delete_one({"Order Number": id_game1})
+                st_autorefresh(limit=2, key=f"{id_game1}")
+
             if game_phase == "Game 2":
                 orders = collection19.find_one({"Order Number": id_game2})
-                quantities = [0] * 9
-                for i in range(9):
-                    quantity_key = f"Quantity {i + 1}"
-                    quantities[i] += orders.get(quantity_key, 0)
 
-                game2_label = id_game2
-                game2_number_search = collection19.find({'Order Number': game2_label},
-                                                        {'_id': 0, 'Order Number': 1})
+                if orders is not None:
+                    quantities = [0] * 9
+                    for i in range(9):
+                        quantity_key = f"Quantity {i + 1}"
+                        quantities[i] += orders.get(quantity_key, 0)
 
-                game2_list = list(game2_number_search)
+                    game2_label = id_game2
+                    game2_number_search = collection19.find_one({'Order Number': game2_label},
+                                                                {'_id': 0, 'Order Number': 1})
+
+                    game2_number_search_as_list = [game2_number_search] if game2_number_search else []
+
+                    game2_list = list(game2_number_search_as_list)
+
+                    find_for_assembly = collection19.find_one({'Order Number': game2_label},
+                                                              {'_id': 0, 'Order Number': 1, 'Quantity': 1, 'Model': 1})
+
+                    collection21.insert_one(find_for_assembly)
+
+                    collection19.delete_one({"Order Number": id_game2})
+                    st_autorefresh(limit=2)
 
     with c2:
         stop = st.button("Finish", key='stop_picking', use_container_width=True, type="primary",
@@ -108,20 +128,10 @@ def handle_buttons(game_phase, id_game1, id_game2):
             if game_phase == "Game 1":
                 quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-                find_for_assembly = collection19.find({'Production Order ID': game1_label},
-                                                      {'_id': 0, 'Production Order ID': 1,
-                                                       'Order Number': 1, 'Quantity': 1, 'Model': 1})
-
-                for doc in find_for_assembly:
-                    collection21.insert_one(doc)
-
-                collection19.delete_many({"Production Order ID": id_game1})
-                st_autorefresh(limit=2)
-
                 search = collection19.find_one()
 
                 if search:
-                    id_game1 = search["Production Order ID"]
+                    id_game1 = search["Order Number"]
                     id_game2 = search["Order Number"]
 
                 else:
@@ -139,7 +149,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
                 for number in numbers_list:
                     find_for_assembly = collection20.find({'Number': number},
-                                                          {'_id': 0, 'Production Order ID': 1, 'Number': 1,
+                                                          {'_id': 0, 'Number': 1,
                                                            'Order Line': 1, 'Reference': 1, 'Delivery Date': 1,
                                                            'Description': 1, 'Model': 1, 'Quantity': 1,
                                                            'Color': 1, 'Dimensions': 1})
@@ -147,23 +157,15 @@ def handle_buttons(game_phase, id_game1, id_game2):
                     for doc in find_for_assembly:
                         collection22.insert_one(doc)
                     collection20.delete_one({"Number": number})
+                    collection23.delete_one({"Number": number})
 
             if game_phase == "Game 2":
                 quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                find_for_assembly = collection19.find({'Order Number': game2_label},
-                                                      {'_id': 0, 'Production Order ID': 1,
-                                                       'Order Number': 1, 'Quantity': 1, 'Model': 1})
-
-                for doc in find_for_assembly:
-                    collection21.insert_one(doc)
-
-                collection19.delete_one({"Order Number": id_game2})
-                st_autorefresh(limit=2)
 
                 search = collection19.find_one()
 
                 if search:
-                    id_game1 = search["Production Order ID"]
+                    id_game1 = search["Order Number"]
                     id_game2 = search["Order Number"]
 
                 else:
@@ -180,15 +182,15 @@ def handle_buttons(game_phase, id_game1, id_game2):
                         numbers_list.append(order_number)
 
                 for number in numbers_list:
-                    find_for_assembly = collection20.find({'Number': number},
-                                                          {'_id': 0, 'Production Order ID': 1, 'Number': 1,
-                                                           'Order Line': 1, 'Reference': 1, 'Delivery Date': 1,
-                                                           'Description': 1, 'Model': 1, 'Quantity': 1, 'Color': 1,
-                                                           'Dimensions': 1})
+                    find_for_assembly = collection20.find_one({'Number': number},
+                                                              {'_id': 0, 'Number': 1,
+                                                               'Order Line': 1, 'Reference': 1, 'Delivery Date': 1,
+                                                               'Description': 1, 'Model': 1, 'Quantity': 1, 'Color': 1,
+                                                               'Dimensions': 1})
 
-                    for doc in find_for_assembly:
-                        collection22.insert_one(doc)
+                    collection22.insert_one(find_for_assembly)
                     collection20.delete_one({"Number": number})
+                    collection23.delete_one({"Number": number})
 
     return id_game1
 
@@ -197,11 +199,11 @@ def display_images(game_phase):
     global quantities, game2_label, game1_label, game1_list, game2_list
 
     if quantities == [0, 0, 0, 0, 0, 0, 0, 0, 0]:
-        st.caption(f"The production order being picked is: None")
+        st.caption(f"The order being picked is: None")
 
     else:
         if game_phase == "Game 1":
-            st.caption(f"The production order being picked is: {game1_label}")
+            st.caption(f"The order being picked is: {game1_label}")
 
             numbers_list = []
             df_numbers = []
@@ -213,7 +215,7 @@ def display_images(game_phase):
 
                 for number in numbers_list:
                     find_number = collection20.find({'Number': number},
-                                                    {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Order Line': 1,
+                                                    {'_id': 0, 'Number': 1, 'Order Line': 1,
                                                      'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
                                                      'Quantity': 1, 'Color': 1, 'Dimensions': 1})
                     df_numbers.extend(list(find_number))
@@ -222,19 +224,17 @@ def display_images(game_phase):
                 rows_df = pd.DataFrame(df_numbers)
 
                 if 'Quantity' in rows_df.columns:
-                    columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date',
+                    columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date',
                                'Model', 'Description', 'Color', 'Dimensions']
                     rows_df = rows_df.reindex(columns=columns)
 
                 rows_df = rows_df.rename(columns={
-                    "Production Order ID": 'Production ID',
                     'Number': 'Customer Order',
                     'Reference': 'Product Ref.'
                 })
 
                 st.dataframe(rows_df,
                              column_config={
-                                 "Production ID": 'Production ID',
                                  "Customer Order": "Customer Order",
                                  'Order Line': 'Order Line',
                                  'Product Ref.': "Product Ref.",
@@ -248,7 +248,7 @@ def display_images(game_phase):
                              hide_index=True)
 
         if game_phase == "Game 2":
-            st.caption(f"The production order being picked is: {game2_label}")
+            st.caption(f"The order being picked is: {game2_label}")
 
             numbers_list = []
             df_numbers = []
@@ -259,28 +259,28 @@ def display_images(game_phase):
                     numbers_list.append(order_number)
 
                 for number in numbers_list:
-                    find_number = collection20.find({'Number': number},
-                                                    {'_id': 0, "Production Order ID": 1, 'Number': 1, 'Order Line': 1,
-                                                     'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
-                                                     'Quantity': 1, 'Color': 1, 'Dimensions': 1})
-                    df_numbers.extend(list(find_number))
+                    find_number = collection20.find_one({'Number': number},
+                                                        {'_id': 0, 'Number': 1, 'Order Line': 1,
+                                                         'Reference': 1, 'Delivery Date': 1, 'Description': 1,
+                                                         'Model': 1,
+                                                         'Quantity': 1, 'Color': 1, 'Dimensions': 1})
+                    find_number_as_list = [find_number] if find_number else []
+                    df_numbers.extend(find_number_as_list)
 
                 rows_df = pd.DataFrame(df_numbers)
 
                 if 'Quantity' in rows_df.columns:
-                    columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date',
+                    columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date',
                                'Model', 'Description', 'Color', 'Dimensions']
                     rows_df = rows_df.reindex(columns=columns)
 
                 rows_df = rows_df.rename(columns={
-                    "Production Order ID": 'Production ID',
                     'Number': 'Customer Order',
                     'Reference': 'Product Ref.'
                 })
 
                 st.dataframe(rows_df,
                              column_config={
-                                 "Production ID": 'Production ID',
                                  "Customer Order": "Customer Order",
                                  'Order Line': 'Order Line',
                                  'Product Ref.': "Product Ref.",

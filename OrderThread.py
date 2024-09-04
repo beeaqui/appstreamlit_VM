@@ -5,16 +5,19 @@ import random
 from time import sleep
 import threading
 import csv
+from pathlib import Path
 from pymongo import MongoClient
 from Order import *
 
 keep_on_going_event = threading.Event()
 
+file_path = Path('client_orders.csv').resolve()
+
 
 def update_delivery_date():
     try:
         # Read the CSV file into memory
-        with open('../appstreamlit_VM/client_orders.csv', 'r') as file:
+        with file_path.open('r') as file:
             reader = csv.DictReader(file)
             rows = list(reader)  # Read all rows into a list
     except Exception as e:
@@ -47,7 +50,7 @@ def update_delivery_date():
         updated_rows.append(row)
 
     # Write the updated data back to the CSV file
-    with open('../appstreamlit_VM/client_orders.csv', 'w', newline='') as file:
+    with file_path.open('w', newline='') as file:
         fieldnames = reader.fieldnames
         writer = csv.DictWriter(file, fieldnames=fieldnames)
 
@@ -66,7 +69,7 @@ def read_orders_from_csv():
     orders = []
     for document in cursor:
         if document['Game Phase'] == "Game 1":
-            with open('../appstreamlit_VM/client_orders.csv', mode='r') as file:
+            with file_path.open(mode='r') as file:
                 csv_reader = csv.DictReader(file)
 
                 for row in csv_reader:
@@ -86,7 +89,7 @@ def read_orders_from_csv():
                     return None
 
         elif document['Game Phase'] == "Game 2":
-            with open('../appstreamlit_VM/client_orders.csv', mode='r') as file:
+            with file_path.open(mode='r') as file:
                 csv_reader = csv.DictReader(file)
 
                 for row in csv_reader:
@@ -140,6 +143,8 @@ def run():
         collection20 = db['LogisticsOrdersProcess']
         collection21 = db['AssemblyOrders']
         collection22 = db['AssemblyOrdersProcess']
+        collection23 = db['SaveOrdersLogistics']
+        collection24 = db['GameStartStop']
 
         print("Connected successfully")
         i = 0
@@ -162,6 +167,7 @@ def run():
         collection20.drop()
         collection21.drop()
         collection22.drop()
+        collection23.drop()
 
         update_delivery_date()
         order = read_orders_from_csv()

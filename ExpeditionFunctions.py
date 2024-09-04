@@ -17,7 +17,7 @@ def connect_mongodb():
 def find_expedition_orders(db):
     collection6 = db['expeditionOrders']
 
-    expedition_orders = collection6.find({}, {'_id': 0, 'Production Order ID': 1, 'Number': 1, 'Order Line': 1,
+    expedition_orders = collection6.find({}, {'_id': 0, 'Number': 1, 'Order Line': 1,
                                               'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
                                               'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
@@ -48,12 +48,11 @@ def display_tables_expedition():
     rows_df = pd.DataFrame(list(expedition_orders))
 
     if 'Quantity' in rows_df.columns:
-        columns = ['Production Order ID', 'Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
+        columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
                    'Description', 'Color', 'Dimensions']
         rows_df = rows_df.reindex(columns=columns)
 
     rows_df = rows_df.rename(columns={
-        "Production Order ID": 'Production ID',
         'Number': 'Customer Order',
         'Reference': 'Product Ref.'
     })
