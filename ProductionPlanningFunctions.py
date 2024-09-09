@@ -343,18 +343,18 @@ def update_timer():
                         border: 1px solid rgb(49, 51, 63, 0.2);
                     }}
                 </style>
-    
+
                 <body>
                     <div style="font-size: 1.4rem; color: #333; font-family: 'Verdana', sans-serif;">
                         <span style="font-weight: bold; color: rgb(85,88,103);">Timer: </span>
                         <span id="timer" style="font-weight: bold; color: rgb(49, 90, 146);">00:00:00</span>
                     </div>
-    
+
                     <script>
                         var seconds = 0;
                         var timerInterval;
                         var paused = true;
-    
+
                         function startTimer() {{
                             if (!paused) return; // If already running, do nothing
                             paused = false;
@@ -363,33 +363,33 @@ def update_timer():
                                 updateTimer();
                             }}, 1000);
                         }}
-    
+
                         function pauseTimer() {{
                             clearInterval(timerInterval);
                             paused = true;
-                            document.cookie = 'paused=true; path=/; domain=localhost';
+                            document.cookie = 'paused=true; path=/;';
                         }}
-    
+
                         function resetTimer() {{
                             clearInterval(timerInterval);
                             seconds = 0;
                             paused = true;
                             updateTimer();
                         }}
-    
+
                         function updateTimer() {{
                             var hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
                             var minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
                             var secs = (seconds % 60).toString().padStart(2, '0');
                             var timeString = hours + ':' + minutes + ':' + secs;
-                            document.cookie = 'myClock=' + timeString + '; path=/; domain=localhost';
+                            document.cookie = 'myClock=' + timeString + '; path=/;';
                             document.getElementById("timer").innerHTML = timeString;
                         }}
-    
+
                         document.addEventListener("DOMContentLoaded", function () {{
                             var cookies = document.cookie.split(';');
                             var isPaused = false;
-    
+
                             for (var i = 0; i < cookies.length; i++) {{
                                 var cookie = cookies[i].trim();
                                 if (cookie.startsWith('paused=')) {{
@@ -401,13 +401,13 @@ def update_timer():
                                     seconds = parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
                                 }}
                             }}
-    
+
                             updateTimer(); // Update the timer display with the current time
-    
+
                             if (!isPaused) {{
                                 startTimer(); // Continue the timer if it wasn't paused
                             }}
-    
+
                             {start_timer_js}
                             {pause_timer_js}
                         }});
