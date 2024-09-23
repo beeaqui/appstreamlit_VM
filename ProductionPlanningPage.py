@@ -6,9 +6,6 @@ db = client['local']
 
 
 def production_page(db):
-    c = st.container()
-    with c:
-        update_timer()
 
     st.title(":gray[Customer orders]",
              help='''\n This is where you can explore a detailed catalog of **Customer orders**, 
