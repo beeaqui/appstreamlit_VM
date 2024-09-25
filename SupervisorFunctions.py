@@ -373,7 +373,7 @@ def plot_generated_orders(width_plot):
         showlegend=False,
         dragmode=False,
         modebar=dict(
-            orientation='v',  # Vertical modebar position
+            orientation='v',  # Vertical mode bar position
             bgcolor='rgba(0,0,0,0)',  # Transparent modebar
             activecolor='rgb(0,0,0,0)',  # Transparent active color
             color='rgba(0,0,0,0)',  # Transparent inactive color
@@ -603,10 +603,12 @@ def orders_distribution_plot(width_plot):
     st.plotly_chart(fig, use_container_width=True)
 
 
-def calculate_delay_orders(width_plot):
+def calculate_delay_orders():
     db = connect_mongodb()
     collection7 = db['ordersConcluded']
     collection11 = db['TimeExpeditionEnd']
+    collection25 = db['DelayedOrders']
+    document = collection25.find()
 
     delivery_times = list(collection7.find({}))
     expedition_times = list(collection11.find({}))
@@ -625,8 +627,18 @@ def calculate_delay_orders(width_plot):
 
                 if expedition_time_date > delivery_time_date:
                     total_delay_orders += 1
+                    if document:
+                        collection25.update_one({}, {'$set': {'Total delayed orders': total_delay_orders}}, upsert=True)
+                    else:
+                        collection25.insert_one({'Total delayed orders': total_delay_orders})
+
                 else:
                     without_delay += 1
+    return total_delay_orders, without_delay
+
+
+def plot_delay_orders(width_plot):
+    total_delay_orders, without_delay = calculate_delay_orders()
 
     # Create data for the bar chart
     data = {'Status': ['Orders on Time', 'Delayed Orders'],
@@ -637,13 +649,13 @@ def calculate_delay_orders(width_plot):
     fig = px.bar(df, x='Status', y='Count', color='Status',
                  color_discrete_map=color_map,
                  labels={'Count': 'Number of Orders'},
-                 title='Order delevery status')
+                 title='Order delivery status')
 
     # Update layout to disable interaction
     fig.update_layout(
         width=width_plot,
         title=dict(
-            text='Order delevery status',
+            text='Order delivery status',
             x=0.5,  # Center the title
             xanchor='center'  # Anchor the title to the center
         ),
@@ -772,8 +784,8 @@ def solution_trajectory(coefficients, x_coefficients, y_coefficients, objective_
         width=width_plot,
         height=420,
         modebar=dict(
-            orientation='v',  # Vertical modebar position
-            bgcolor='rgba(0,0,0,0)',  # Transparent modebar
+            orientation='v',
+            bgcolor='rgba(0,0,0,0)',
             activecolor='rgb(0,0,0,0)',  # Transparent active color
             color='rgba(0,0,0,0)',  # Transparent inactive color
         ))

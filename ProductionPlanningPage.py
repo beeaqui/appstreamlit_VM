@@ -1,6 +1,7 @@
 from ProductionPlanningFunctions import *
 from LogisticsFunctions import *
 
+
 client = MongoClient("mongodb://localhost:27017/")
 db = client['local']
 

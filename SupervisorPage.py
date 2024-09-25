@@ -90,19 +90,19 @@ def conf3(configuration3):
 
 
 def supervisor_page():
-
     update_timer()
 
     tab_bar_data = [
         stx.TabBarItemData(id=1, title="Game configurations", description=" "),
-        stx.TabBarItemData(id=2, title="Game analysis", description=" "),
-        stx.TabBarItemData(id=3, title="Order generation status", description=" "),
-        stx.TabBarItemData(id=4, title="Cumulative order progress", description=" "),
-        stx.TabBarItemData(id=5, title="Quality distribution", description=" "),
-        stx.TabBarItemData(id=6, title="Lead time analysis", description=" "),
-        stx.TabBarItemData(id=7, title="Workstation distribution", description=" "),
-        stx.TabBarItemData(id=8, title="Order delivery status", description=" "),
-        stx.TabBarItemData(id=9, title="Linear programming problem", description=" ")
+        stx.TabBarItemData(id=2, title="Game evolution", description=" "),
+        stx.TabBarItemData(id=3, title="Game analysis", description=" "),
+        stx.TabBarItemData(id=4, title="Order generation status", description=" "),
+        stx.TabBarItemData(id=5, title="Cumulative order progress", description=" "),
+        stx.TabBarItemData(id=6, title="Quality distribution", description=" "),
+        stx.TabBarItemData(id=7, title="Lead time analysis", description=" "),
+        stx.TabBarItemData(id=8, title="Workstation distribution", description=" "),
+        stx.TabBarItemData(id=9, title="Order delivery status", description=" "),
+        stx.TabBarItemData(id=10, title="Linear programming problem", description=" ")
     ]
 
     chosen_id = stx.tab_bar(data=tab_bar_data, default=1)
@@ -204,6 +204,41 @@ def supervisor_page():
         conf3(configuration3)
 
     if chosen_id == "2":
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client['local']
+        collection25 = db['DelayedOrders']
+        collection7 = db['ordersConcluded']
+
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown(
+                "<h1 style='font-size:60px; color: black;'>TARGET: <span style='color: grey;'>20</span></h1>",
+                unsafe_allow_html=True)
+
+        total_orders = collection25.count_documents({})
+
+        with c2:
+            st.markdown(
+                f"<h1 style='font-size:60px; color: black;'>ACTUAL: "
+                f"<span style='color: darkred;'>{total_orders}</span></h1>",
+                unsafe_allow_html=True
+            )
+
+        delayed_orders = collection25.find_one({}, {'_id': 0, 'Total delayed orders': 1})
+
+        if delayed_orders and 'Total delayed orders' in delayed_orders:
+            delayed_orders_count = delayed_orders['Total delayed orders']  # Extract the count
+        else:
+            delayed_orders_count = 0  # Default to 0 if not found
+
+        st.caption('')
+        st.markdown(
+            f"<h1 style='font-size:50px; color: black;'>Delayed orders: "
+            f"<span style='color: darkred;'>{delayed_orders_count}</span></h1>",
+            unsafe_allow_html=True
+        )
+
+    if chosen_id == "3":
         st.subheader("Game analysis", help='''\n This analysis provides important information related  various 
         metrics for an evolutionary analysis of the production line. \n Pay attention and discuss it with your 
         teammates.''')
@@ -226,7 +261,7 @@ def supervisor_page():
             orders_distribution_plot(width1)
 
         with c2:
-            calculate_delay_orders(width2)
+            plot_delay_orders(width2)
 
         with c1:
             x_coefficients = [16.0, 18.0, 16.0, 11.0, 0.0, 1.0]
@@ -239,25 +274,25 @@ def supervisor_page():
             result = linear_programming_trajectory(coefficients, x_coefficients, y_coefficients, signs,
                                                    [objective_x, objective_y], width1)
 
-    if chosen_id == "3":
+    if chosen_id == "4":
         plot_generated_orders(width3)
 
-    if chosen_id == "4":
+    if chosen_id == "5":
         wip_plot(width3)
 
-    if chosen_id == "5":
+    if chosen_id == "6":
         quality_distribution_plot(width3)
 
-    if chosen_id == "6":
+    if chosen_id == "7":
         leadtime_plot(width3)
 
-    if chosen_id == "7":
+    if chosen_id == "8":
         orders_distribution_plot(width3)
 
-    if chosen_id == "8":
-        calculate_delay_orders(width3)
-
     if chosen_id == "9":
+        plot_delay_orders(width3)
+
+    if chosen_id == "10":
         x_coefficients = [16.0, 18.0, 16.0, 11.0, 0.0, 1.0]
         y_coefficients = [23.0, 18.0, 14.0, 16.0, 1.0, 0.0]
         signs = ["<=", "<=", "<=", "<=", ">=", ">="]

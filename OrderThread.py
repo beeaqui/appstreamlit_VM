@@ -146,6 +146,7 @@ def run():
         collection22 = db['AssemblyOrdersProcess']
         collection23 = db['SaveOrdersLogistics']
         collection24 = db['GameStartStop']
+        collection25 = db['DelayedOrders']
 
         print("Connected successfully")
         i = 0
@@ -169,6 +170,7 @@ def run():
         collection21.drop()
         collection22.drop()
         collection23.drop()
+        collection25.drop()
 
         update_delivery_date()
         order = read_orders_from_csv()
