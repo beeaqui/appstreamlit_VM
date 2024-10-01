@@ -7,6 +7,11 @@ from ortools.linear_solver import pywraplp
 import plotly.graph_objects as go
 from gekko import GEKKO
 
+client = MongoClient("mongodb://localhost:27017/")
+db = client['local']
+collection7 = db['ordersConcluded']
+collection13 = db['CumulativeOrdersFinished']
+
 
 def solution(coefficients, x_coefficients, y_coefficients, objective_coefficients, vertices_polygon, signs):
     m = GEKKO(remote=False)
@@ -71,7 +76,7 @@ def solution(coefficients, x_coefficients, y_coefficients, objective_coefficient
                              name='Intersection Points', marker=dict(size=6)))
 
     # trajectory of produced orders
-    standard_coordinates, sensor_kit_coordinates = trajectory(connect_mongodb())
+    standard_coordinates, sensor_kit_coordinates = trajectory()
     fig.add_trace(go.Scatter(x=standard_coordinates, y=sensor_kit_coordinates, line=dict(color='black'),
                              mode='markers', marker=dict(size=5), name='Trajectory'))
 
@@ -186,18 +191,9 @@ def linear_programming_trajectory(coefficients, x_coefficients, y_coefficients, 
     return result
 
 
-def connect_mongodb():
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['local']
-
-    return db
-
-
-def find_finished_orders(db):
-    connect_mongodb()
-    collection7 = db['ordersConcluded']
-    finished_orders = collection7.find({}, {'_id': 0, 'Number': 1, 'Reference': 1, 'Delivery Date': 1,
-                                            'Time Gap': 1, 'Description': 1, 'Model': 1, 'Quantity': 1,
+def find_finished_orders():
+    finished_orders = collection7.find({}, {'_id': 0, 'Number': 1, 'Reference': 1, 'Delivery date': 1,
+                                            'Time gap': 1, 'Description': 1, 'Model': 1, 'Quantity': 1,
                                             'Color': 1, 'Dimensions': 1})
 
     finished_orders_list = list(finished_orders)
@@ -205,14 +201,13 @@ def find_finished_orders(db):
 
 
 def cumulative_finished_orders(db):
-    collection13 = db['CumulativeOrdersFinished']
 
     cumulative_quantities = {
         'Quantity Complex': 0,
         'Quantity Sensor Kit': 0
     }
 
-    finished_orders_list = find_finished_orders(db)
+    finished_orders_list = find_finished_orders()
 
     existing_orders = set(collection13.distinct("Number"))
 
@@ -242,10 +237,8 @@ def cumulative_finished_orders(db):
         collection13.insert_one(document)
 
 
-def trajectory(db):
-    collection13 = db['CumulativeOrdersFinished']
+def trajectory():
     data = collection13.find()
-
     standard_coordinates = []
     sensor_kit_coordinates = []
 

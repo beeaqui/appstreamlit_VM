@@ -10,12 +10,19 @@ width1 = 320
 width2 = 320
 width3 = 500
 
+client = MongoClient("mongodb://localhost:27017/")
+db = client['local']
+collection1 = db['ordersCollection']
+collection7 = db['ordersConcluded']
+collection15 = db['ValueGenerateOrders']
+collection16 = db['HighPriority']
+collection17 = db['MediumPriority']
+collection18 = db['GamePhaseConfig']
+collection24 = db['GameStartStop']
+collection25 = db['DelayedOrders']
+
 
 def game_phase_config(game_option):
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['local']
-    collection18 = db['GamePhaseConfig']
-
     count1 = collection18.count_documents({})
 
     if game_option:
@@ -26,18 +33,10 @@ def game_phase_config(game_option):
 
 
 def game_mode_config(game_mode):
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['local']
-    collection24 = db['GameStartStop']
-
     collection24.update_one({}, {'$set': {'Game Mode': game_mode}}, upsert=True)
 
 
 def conf1(configuration1):
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['local']
-    collection15 = db['ValueGenerateOrders']
-
     count1 = collection15.count_documents({})
 
     if count1 != 0:
@@ -50,10 +49,6 @@ def conf1(configuration1):
 
 
 def conf2(configuration2):
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['local']
-    collection16 = db['HighPriority']
-
     high_priority = configuration2
 
     hours = high_priority.hour + high_priority.minute / 60
@@ -65,15 +60,11 @@ def conf2(configuration2):
         collection16.insert_one({'High Priority': hours})
 
     else:
-        configuration_default = 0.016667
+        configuration_default = 0.08333
         collection16.insert_one({'High Priority': configuration_default})
 
 
 def conf3(configuration3):
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client['local']
-    collection17 = db['MediumPriority']
-
     medium_priority = configuration3
 
     hours = medium_priority.hour + medium_priority.minute / 60
@@ -85,13 +76,11 @@ def conf3(configuration3):
         collection17.insert_one({'Medium Priority': hours})
 
     else:
-        configuration_default = 0.0333
+        configuration_default = 0.13333
         collection17.insert_one({'Medium Priority': configuration_default})
 
 
 def supervisor_page():
-    update_timer()
-
     tab_bar_data = [
         stx.TabBarItemData(id=1, title="Game configurations", description=" "),
         stx.TabBarItemData(id=2, title="Game evolution", description=" "),
@@ -107,16 +96,13 @@ def supervisor_page():
 
     chosen_id = stx.tab_bar(data=tab_bar_data, default=1)
 
+    update_timer()
+
     if chosen_id == "1":
         st.subheader("Game configurations", help='''\n Here you can set some configurations that will define the game. 
         Select the values for them to be accurate with the reality.''')
 
-        client = MongoClient("mongodb://localhost:27017/")
-        db = client['local']
-
         def get_selected_game_phase():
-            collection18 = db['GamePhaseConfig']
-
             document = collection18.find_one()
             if document:
                 return document.get('Game Phase')
@@ -164,13 +150,14 @@ def supervisor_page():
                 db['AssemblyOrders'].drop()
                 db['AssemblyOrdersProcess'].drop()
                 db['SaveOrdersLogistics'].drop()
+                db['GameStartStop'].drop()
+                db['DelayedOrders'].drop()
+                db['FlowProcessKPI'].drop()
 
         with c1:
             create_orders_button = st.button('Start game', key='create_orders', type='primary',
                                              help='Start generating orders',
                                              use_container_width=True)
-
-        collection1 = db['ordersCollection']
 
         if create_orders_button:
             collection1.drop()
@@ -195,48 +182,111 @@ def supervisor_page():
 
         st.caption("")
 
-        configuration2 = st.time_input(":blue[High priority orders value (HH-MM):]", value=datetime.time(0, 1))
+        configuration2 = st.time_input(":blue[High priority orders value (HH-MM):]", value=datetime.time(0, 5))
         conf2(configuration2)
 
         st.caption("")
 
-        configuration3 = st.time_input(":blue[Medium priority orders value (HH-MM):]", value=datetime.time(0, 2))
+        configuration3 = st.time_input(":blue[Medium priority orders value (HH-MM):]", value=datetime.time(0, 8))
         conf3(configuration3)
 
     if chosen_id == "2":
-        client = MongoClient("mongodb://localhost:27017/")
-        db = client['local']
-        collection25 = db['DelayedOrders']
-        collection7 = db['ordersConcluded']
-
-        c1, c2 = st.columns(2)
+        c1, c2, c3, c4 = st.columns(4)
+        # Display TARGET in the first column
         with c1:
             st.markdown(
-                "<h1 style='font-size:60px; color: black;'>TARGET: <span style='color: grey;'>20</span></h1>",
-                unsafe_allow_html=True)
-
-        total_orders = collection25.count_documents({})
+                '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;'
+                'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
+                '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
+                'font-weight: bold; color: rgb(85,88,103);">'
+                'TARGET</h1>'
+                '<h2 style="font-size: 30px; line-height: 30px; font-family: Verdana, sans-serif;'
+                'font-weight: bold; color: rgb(85,88,103);">'
+                '20</h2>'
+                '</div>', unsafe_allow_html=True)
 
         with c2:
+            total_orders = collection7.count_documents({})
+            if total_orders:
+                total_orders = total_orders
+            else:
+                total_orders = '-'
             st.markdown(
-                f"<h1 style='font-size:60px; color: black;'>ACTUAL: "
-                f"<span style='color: darkred;'>{total_orders}</span></h1>",
-                unsafe_allow_html=True
-            )
+                '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;'
+                'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
+                '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
+                'font-weight: bold; color: rgb(85,88,103);">'
+                'ACTUAL</h1>'
+                '<h2 style="font-size: 30px; line-height: 30px; font-family: Verdana, sans-serif;'
+                'font-weight: bold; color: rgb(85,88,103);">'
+                f'{total_orders}</h2>'
+                '</div>', unsafe_allow_html=True)
 
-        delayed_orders = collection25.find_one({}, {'_id': 0, 'Total delayed orders': 1})
+        with c3:
+            delayed_orders = collection25.find_one({}, {'_id': 0, 'Total delayed orders': 1})
 
-        if delayed_orders and 'Total delayed orders' in delayed_orders:
-            delayed_orders_count = delayed_orders['Total delayed orders']  # Extract the count
-        else:
-            delayed_orders_count = 0  # Default to 0 if not found
+            if delayed_orders and 'Total delayed orders' in delayed_orders:
+                delayed_orders = delayed_orders['Total delayed orders']
+            else:
+                delayed_orders = '-'
+            st.markdown(
+                '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;'
+                'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
+                '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
+                'font-weight: bold; color: rgb(85,88,103);">'
+                'DELAYED ORDERS</h1>'
+                '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
+                'font-weight: bold; color: rgb(85,88,103);">'
+                f'{delayed_orders}</h2>'
+                '</div>', unsafe_allow_html=True)
+
+        with c4:
+            flow_process = collection26.find_one({}, {'_id': 0, 'Flow delayed orders': 1})
+
+            if flow_process and 'Flow delayed orders' in flow_process:
+                flow_process = flow_process['Flow delayed orders']
+            else:
+                flow_process = '-'
+
+            if flow_process == '-':
+                st.markdown(
+                    '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;'
+                    'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
+                    '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
+                    'font-weight: bold; color: rgb(85,88,103);">'
+                    'FLOW</h1>'
+                    '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
+                    'font-weight: bold; color: rgb(85,88,103);">'
+                    f'{flow_process}</h2>'
+                    '</div>', unsafe_allow_html=True)
+
+            elif flow_process <= 0:
+                st.markdown(
+                    '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;'
+                    'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
+                    '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
+                    'font-weight: bold; color: rgb(85,88,103);">'
+                    'FLOW</h1>'
+                    '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
+                    'font-weight: bold; color: rgb(51, 115, 87);">'
+                    f'{flow_process} min</h2>'
+                    '</div>', unsafe_allow_html=True)
+
+            elif flow_process > 0:
+                st.markdown(
+                    '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;'
+                    'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
+                    '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
+                    'font-weight: bold; color: rgb(85,88,103);">'
+                    'FLOW</h1>'
+                    '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
+                    'font-weight: bold; color: rgb(207, 119, 116);">'
+                    f'{flow_process} min</h2>'
+                    '</div>', unsafe_allow_html=True)
 
         st.caption('')
-        st.markdown(
-            f"<h1 style='font-size:50px; color: black;'>Delayed orders: "
-            f"<span style='color: darkred;'>{delayed_orders_count}</span></h1>",
-            unsafe_allow_html=True
-        )
+        st.caption('')
+        kpis_orders()
 
     if chosen_id == "3":
         st.subheader("Game analysis", help='''\n This analysis provides important information related  various 

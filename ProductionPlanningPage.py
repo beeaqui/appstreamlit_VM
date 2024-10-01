@@ -4,12 +4,14 @@ from LogisticsFunctions import *
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client['local']
+collection1 = db['ordersCollection']
+collection2 = db['selectedOrders']
+collection14 = db['PreSelectedOrders']
 
 
-def production_page(db):
-
+def production_page():
     st.title(":gray[Customer orders]",
-             help='''\n This is where you can explore a detailed catalog of **Customer orders**, 
+             help='''\n This is where you can explore a detailed catalog of **Numbers**, 
             each meticulously documented with essential information, as presented in the 
             table below.
             \n At your disposal is the ability to meticulously curate the orders slated for 
@@ -18,13 +20,11 @@ def production_page(db):
 
     st.write("")
 
-    collection1 = db['ordersCollection']
-
     count1 = collection1.count_documents({})
 
     if count1 != 0:
         grid_container = create_grid()
-        selected_rows = grid_container["selected_rows"]
+        selected_rows = grid_container[grid_container['Select']]
         insert_pre(selected_rows)
         st_autorefresh(limit=50, interval=10000, key="aaaa", debounce=False)
 
@@ -37,6 +37,7 @@ def production_page(db):
             if submit_button:
                 delete_selected_rows(selected_rows)
                 insert_selected_rows(selected_rows)
+                st.session_state.selected_rows = []
 
                 insert_logistics_orders(selected_rows)
 
@@ -44,7 +45,6 @@ def production_page(db):
 
                 insert_production_finished_rows(selected_rows)
 
-                collection14 = db['PreSelectedOrders']
                 collection14.drop()
 
                 insert_datetime_selected_rows(selected_rows)
@@ -60,7 +60,6 @@ def production_page(db):
 
         st.caption("")
 
-        collection2 = db['selectedOrders']
         count = collection2.count_documents({})
 
         if count != 0:
@@ -106,7 +105,6 @@ def production_page(db):
 
         st.caption("")
 
-        collection2 = db['selectedOrders']
         count = collection2.count_documents({})
 
         if count != 0:

@@ -22,15 +22,15 @@ collection23 = db['SaveOrdersLogistics']
 
 
 def find_logistics_orders():
-    data_logistics_orders = collection23.find({}, {'_id': 0, 'Number': 1, 'Order Line': 1,
-                                                   'Reference': 1, 'Delivery Date': 1, 'Time Gap': 1, 'Description': 1,
+    data_logistics_orders = collection23.find({}, {'_id': 0, 'Number': 1, 'Order line': 1,
+                                                   'Reference': 1, 'Delivery date': 1, 'Time gap': 1, 'Description': 1,
                                                    'Model': 1, 'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
     for row in data_logistics_orders:
         if not collection20.find_one({'Number': row['Number'], 'Reference': row['Reference']}):
             collection20.insert_one(
-                {'Number': row['Number'], 'Order Line': row['Order Line'], 'Reference': row['Reference'],
-                 'Delivery Date': row['Delivery Date'],
+                {'Number': row['Number'], 'Order line': row['Order line'], 'Reference': row['Reference'],
+                 'Delivery date': row['Delivery date'],
                  'Description': row['Description'], 'Model': row['Model'],
                  'Quantity': row['Quantity'], 'Color': row['Color'], 'Dimensions': row['Dimensions']}
             )
@@ -150,7 +150,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
                 for number in numbers_list:
                     find_for_assembly = collection20.find({'Number': number},
                                                           {'_id': 0, 'Number': 1,
-                                                           'Order Line': 1, 'Reference': 1, 'Delivery Date': 1,
+                                                           'Order line': 1, 'Reference': 1, 'Delivery date': 1,
                                                            'Description': 1, 'Model': 1, 'Quantity': 1,
                                                            'Color': 1, 'Dimensions': 1})
 
@@ -184,7 +184,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
                 for number in numbers_list:
                     find_for_assembly = collection20.find_one({'Number': number},
                                                               {'_id': 0, 'Number': 1,
-                                                               'Order Line': 1, 'Reference': 1, 'Delivery Date': 1,
+                                                               'Order line': 1, 'Reference': 1, 'Delivery date': 1,
                                                                'Description': 1, 'Model': 1, 'Quantity': 1, 'Color': 1,
                                                                'Dimensions': 1})
 
@@ -199,7 +199,7 @@ def display_images(game_phase):
     global quantities, game2_label, game1_label, game1_list, game2_list
 
     if quantities == [0, 0, 0, 0, 0, 0, 0, 0, 0]:
-        st.caption(f"The order being picked is: None")
+        st.caption(f"Waiting for the next order to pick.")
 
     else:
         if game_phase == "Game 1":
@@ -215,8 +215,8 @@ def display_images(game_phase):
 
                 for number in numbers_list:
                     find_number = collection20.find({'Number': number},
-                                                    {'_id': 0, 'Number': 1, 'Order Line': 1,
-                                                     'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
+                                                    {'_id': 0, 'Number': 1, 'Order line': 1,
+                                                     'Reference': 1, 'Delivery date': 1, 'Description': 1, 'Model': 1,
                                                      'Quantity': 1, 'Color': 1, 'Dimensions': 1})
                     df_numbers.extend(list(find_number))
 
@@ -224,22 +224,22 @@ def display_images(game_phase):
                 rows_df = pd.DataFrame(df_numbers)
 
                 if 'Quantity' in rows_df.columns:
-                    columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date',
+                    columns = ['Number', 'Order line', 'Reference', 'Quantity', 'Delivery date',
                                'Model', 'Description', 'Color', 'Dimensions']
                     rows_df = rows_df.reindex(columns=columns)
 
                 rows_df = rows_df.rename(columns={
-                    'Number': 'Customer Order',
-                    'Reference': 'Product Ref.'
+                    'Number': 'Number',
+                    'Reference': 'Reference'
                 })
 
                 st.dataframe(rows_df,
                              column_config={
-                                 "Customer Order": "Customer Order",
-                                 'Order Line': 'Order Line',
-                                 'Product Ref.': "Product Ref.",
+                                 "Number": "Number",
+                                 'Order line': 'Order line',
+                                 'Reference': "Reference",
                                  'Quantity': "Quantity",
-                                 'Delivery Date': "Delivery Date",
+                                 'Delivery date': "Delivery date",
                                  'Model': "Model",
                                  'Description': "Description",
                                  'Color': "Color",
@@ -260,8 +260,8 @@ def display_images(game_phase):
 
                 for number in numbers_list:
                     find_number = collection20.find_one({'Number': number},
-                                                        {'_id': 0, 'Number': 1, 'Order Line': 1,
-                                                         'Reference': 1, 'Delivery Date': 1, 'Description': 1,
+                                                        {'_id': 0, 'Number': 1, 'Order line': 1,
+                                                         'Reference': 1, 'Delivery date': 1, 'Description': 1,
                                                          'Model': 1,
                                                          'Quantity': 1, 'Color': 1, 'Dimensions': 1})
                     find_number_as_list = [find_number] if find_number else []
@@ -270,22 +270,22 @@ def display_images(game_phase):
                 rows_df = pd.DataFrame(df_numbers)
 
                 if 'Quantity' in rows_df.columns:
-                    columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date',
+                    columns = ['Number', 'Order line', 'Reference', 'Quantity', 'Delivery date',
                                'Model', 'Description', 'Color', 'Dimensions']
                     rows_df = rows_df.reindex(columns=columns)
 
                 rows_df = rows_df.rename(columns={
-                    'Number': 'Customer Order',
-                    'Reference': 'Product Ref.'
+                    'Number': 'Number',
+                    'Reference': 'Reference'
                 })
 
                 st.dataframe(rows_df,
                              column_config={
-                                 "Customer Order": "Customer Order",
-                                 'Order Line': 'Order Line',
-                                 'Product Ref.': "Product Ref.",
+                                 "Number": "Number",
+                                 'Order line': 'Order line',
+                                 'Reference': "Reference",
                                  'Quantity': "Quantity",
-                                 'Delivery Date': "Delivery Date",
+                                 'Delivery date': "Delivery date",
                                  'Model': "Model",
                                  'Description': "Description",
                                  'Color': "Color",

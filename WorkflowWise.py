@@ -54,7 +54,7 @@ def website():
 
         organization = st.text_input(f":blue[**Insert your organization**]", key='org')
         key = unique_key('login')
-        st_autorefresh(limit=10, interval=15000, key='key')
+        st_autorefresh(limit=100, interval=10000, key='key')
 
     authenticator = Authenticate(credentials, cookie_name='Streamlit', cookie_key='key', cookie_expiry_days=4)
 
@@ -66,6 +66,7 @@ def website():
                 st.session_state.logged_in = True
                 session_key = str(get_key(username))
                 permission = []
+                st_autorefresh(limit=50, interval=10000, key='login')
 
                 if session_key == 'Supervisor':
                     permission = ["Supervisor", "Production planning", "Logistics operator",
@@ -105,31 +106,34 @@ def website():
 
                 if selected == "Supervisor":
                     key = unique_key('supervisor')
-                    st_autorefresh(limit=50, interval=15000, key='supervisor')
+                    st_autorefresh(limit=600, interval=6000, key='supervisor')
                     supervisor_page()
 
                 if selected == "Production planning":
-                    production_page(db)
+                    st_autorefresh(limit=600, interval=10000, key='assembly')
+                    production_page()
 
                 if selected == "Assembly process":
+                    st_autorefresh(limit=600, interval=10000, key='assembly')
                     assembly_page()
 
                 if selected == "Logistics operator":
+                    st_autorefresh(limit=600, interval=10000, key='logistics')
                     logistics_page()
 
                 if selected == 'Quality control':
                     key = unique_key('quality')
-                    st_autorefresh(limit=50, interval=15000, key='quality')
+                    st_autorefresh(limit=600, interval=10000, key='quality')
                     quality_page()
 
                 if selected == 'Expedition':
                     key = unique_key('expedition')
-                    st_autorefresh(limit=50, interval=15000, key='expedition')
+                    st_autorefresh(limit=600, interval=10000, key='expedition')
                     expedition_page()
 
                 if selected == 'Production trajectory':
                     key = unique_key('trajectory')
-                    st_autorefresh(limit=50, interval=15000, key='trajectory')
+                    st_autorefresh(limit=600, interval=10000, key='trajectory')
                     optimization_trajectory()
 
     if not authentication_status:

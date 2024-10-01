@@ -6,56 +6,49 @@ from datetime import datetime
 
 from OptimizationFunctions import cumulative_finished_orders
 
+client = MongoClient("mongodb://localhost:27017/")
+db = client['local']
+collection6 = db['expeditionOrders']
+collection7 = db['ordersConcluded']
+collection11 = db['TimeExpeditionEnd']
 
-def connect_mongodb():
-    client = MongoClient("mongodb://localhost:27017/")
 
-    db = client['local']
-    return db
-
-
-def find_expedition_orders(db):
-    collection6 = db['expeditionOrders']
-
-    expedition_orders = collection6.find({}, {'_id': 0, 'Number': 1, 'Order Line': 1,
-                                              'Reference': 1, 'Delivery Date': 1, 'Description': 1, 'Model': 1,
+def find_expedition_orders():
+    expedition_orders = collection6.find({}, {'_id': 0, 'Number': 1, 'Order line': 1,
+                                              'Reference': 1, 'Delivery date': 1, 'Description': 1, 'Model': 1,
                                               'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
     return expedition_orders
 
 
 def delete_expedition_order(db, order_number):
-    collection6 = db['expeditionOrders']
     collection6.delete_one({'Number': order_number})
 
 
 def concluded_orders(db, order_number):
-    collection7 = db['ordersConcluded']
-
-    collection7.insert_one({'Number': order_number['Customer Order'], 'Order Line': order_number['Order Line'],
-                            'Reference': order_number['Product Ref.'], 'Delivery Date': order_number['Delivery Date'],
+    collection7.insert_one({'Number': order_number['Number'], 'Order line': order_number['Order line'],
+                            'Reference': order_number['Reference'], 'Delivery date': order_number['Delivery date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
                             'Dimensions': order_number['Dimensions']})
 
 
 def display_tables_expedition():
-    db = connect_mongodb()
     collection6 = db['expeditionOrders']
 
-    expedition_orders = find_expedition_orders(db)
+    expedition_orders = find_expedition_orders()
 
     rows_df = pd.DataFrame(list(expedition_orders))
 
     if 'Quantity' in rows_df.columns:
-        columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery Date', 'Model',
+        columns = ['Number', 'Order line', 'Reference', 'Quantity', 'Delivery date', 'Model',
                    'Description', 'Color', 'Dimensions']
         rows_df = rows_df.reindex(columns=columns)
 
-    rows_df = rows_df.rename(columns={
-        'Number': 'Customer Order',
-        'Reference': 'Product Ref.'
-    })
+        # Rearranging the columns as per the specified order
+        column_order = ['Number', 'Order line', 'Delivery date',
+                        'Quantity', 'Model', 'Reference', 'Description', 'Color', 'Dimensions']
+        rows_df = rows_df[column_order]
 
     data_groups = [list(rows_df.iloc[i:i + 2].to_dict(orient='records')) for i in range(0, len(rows_df), 2)]
 
@@ -74,7 +67,7 @@ def display_tables_expedition():
                     f"border-radius: 10px; "
                     f"margin-top: 50px; "
                     f"margin-bottom: 10px;'>"
-                    f"Details - Customer order {expedition_order['Customer Order']}</div>",
+                    f"Details - Number {expedition_order['Number']}</div>",
                     unsafe_allow_html=True)
 
                 data = []
@@ -91,25 +84,26 @@ def display_tables_expedition():
                     confirm = st.button('Dispatch', key=f'{expedition_order}', type='primary')
                     if confirm:
                         concluded_orders(db, expedition_order)
-                        insert_confirmation_data(expedition_order['Customer Order'])
-                        delete_expedition_order(db, expedition_order['Customer Order'])
+                        insert_confirmation_data(expedition_order['Number'])
+                        delete_expedition_order(db, expedition_order['Number'])
 
-                        st.toast(f"Order number {expedition_order['Customer Order']} has been successfully shipped",
+                        st.toast(f"Order number {expedition_order['Number']} has been successfully shipped",
                                  icon='✔️')
-                        st_autorefresh(limit=2, key=f"{expedition_order['Customer Order']}")
+                        st_autorefresh(limit=2, key=f"{expedition_order['Number']}")
                         cumulative_finished_orders(db)
 
 
 def insert_confirmation_data(order_number):
-    db = connect_mongodb()
-    collection11 = db['TimeExpeditionEnd']
-
     current_datetime = datetime.now()
     current_date = current_datetime.strftime("%Y-%m-%d")
     current_time = current_datetime.strftime("%H:%M:%S")
 
+    order_data = collection6.find_one({'Number': order_number}, {'_id': 0, 'Order line': 1})
+    order_line = order_data.get('Order line', 'No Order Line Provided')
+
     data_to_insert = {
-        'Orders Number': [order_number],
+        'Order Number': order_number,
+        'Order line': order_line,
         'Total Orders': 1,
         'End Expedition Time': {
             'Date': current_date,

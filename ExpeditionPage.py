@@ -1,4 +1,5 @@
 from ExpeditionFunctions import *
+from SupervisorFunctions import *
 import streamlit as st
 
 
@@ -9,3 +10,4 @@ def expedition_page():
     st.caption("")
 
     display_tables_expedition()
+    total_delay_orders, without_delay = calculate_delay_orders()
