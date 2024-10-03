@@ -228,7 +228,7 @@ def create_grid():
     order_df = order_df[column_order]
 
     # Apply color function to the "Time gap" column using map
-    styled_order_df = order_df.style.applymap(get_color, subset=['Time gap'])
+    styled_order_df = order_df.style.map(get_color, subset=['Time gap'])
 
     # Get DataFrame row-selections from the user with st.data_editor
     grid_container = st.data_editor(

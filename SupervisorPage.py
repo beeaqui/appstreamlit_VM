@@ -192,7 +192,7 @@ def supervisor_page():
 
     if chosen_id == "2":
         c1, c2, c3, c4 = st.columns(4)
-        # Display TARGET in the first column
+
         with c1:
             st.markdown(
                 '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;'
@@ -224,6 +224,7 @@ def supervisor_page():
 
         with c3:
             delayed_orders = collection25.find_one({}, {'_id': 0, 'Total delayed orders': 1})
+            calculate_delay_orders()
 
             if delayed_orders and 'Total delayed orders' in delayed_orders:
                 delayed_orders = delayed_orders['Total delayed orders']
@@ -254,7 +255,7 @@ def supervisor_page():
                     'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
                     '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(85,88,103);">'
-                    'FLOW</h1>'
+                    'LATENESS</h1>'
                     '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(85,88,103);">'
                     f'{flow_process}</h2>'
@@ -266,7 +267,7 @@ def supervisor_page():
                     'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
                     '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(85,88,103);">'
-                    'FLOW</h1>'
+                    'LATENESS</h1>'
                     '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(51, 115, 87);">'
                     f'{flow_process} min</h2>'
@@ -278,7 +279,7 @@ def supervisor_page():
                     'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
                     '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(85,88,103);">'
-                    'FLOW</h1>'
+                    'LATENESS</h1>'
                     '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(207, 119, 116);">'
                     f'{flow_process} min</h2>'

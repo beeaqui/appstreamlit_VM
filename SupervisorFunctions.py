@@ -134,11 +134,13 @@ def kpis_orders():
     def color_delay(delay):
         if isinstance(delay, int) and delay > 0:
             return 'background-color: rgb(207, 119, 116);'
+        elif isinstance(delay, int) and delay <= 0:
+            return 'background-color: rgb(153, 148, 119);'
         return 'background-color: rgb(255, 255, 255);'
 
     # Create DataFrame
     df = pd.DataFrame(data)
-    styled_df = df.style.applymap(color_delay, subset=['Delay'])
+    styled_df = df.style.map(color_delay, subset=['Delay'])
 
     # Display with st.data_editor
     st.data_editor(styled_df, hide_index=True, disabled=True, use_container_width=True)
@@ -826,7 +828,7 @@ def calculate_delay_orders():
 
     for expedition_time in expedition_times:
         for delivery_time in delivery_times:
-            if expedition_time['Order Number'][0] == delivery_time['Number']:
+            if expedition_time['Order Number'] == delivery_time['Number']:
                 dateformat = '%H:%M:%S'
                 start = delivery_time['Delivery date'].replace(' h', ':00')
 
