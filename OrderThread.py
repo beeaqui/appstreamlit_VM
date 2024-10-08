@@ -187,7 +187,7 @@ def read_orders_from_csv():
                     picker = str(i + 1)
                     orders.append(Order(
                         str(picker + '/' + row['quantity']),
-                        row['order_line'],
+                        str(row['number'] + '.' + picker),
                         int(row['reference']),
                         row['delivery_date'],
                         row['time_gap'],
