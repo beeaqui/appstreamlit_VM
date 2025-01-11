@@ -53,8 +53,8 @@ def insert_logistics_orders(selected_rows):
                                             "Quantity 3": 0,
                                             "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
                                             "Quantity 6": 0,
-                                            "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
-                                            "Quantity 9": row['Quantity'],
+                                            "Quantity 7": row['Quantity'],
+                                            "Quantity 8": row['Quantity'],
                                             })
 
         if row['Model'] == "Push-in cylinder":
@@ -64,8 +64,8 @@ def insert_logistics_orders(selected_rows):
                                             "Quantity 3": 0,
                                             "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
                                             "Quantity 6": row['Quantity'] * 2,
-                                            "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
-                                            "Quantity 9": 0,
+                                            "Quantity 7": row['Quantity'],
+                                            "Quantity 8": 0,
                                             })
 
         if row['Model'] == "L-fit cylinder":
@@ -75,8 +75,8 @@ def insert_logistics_orders(selected_rows):
                                             "Quantity 3": row['Quantity'] * 2,
                                             "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
                                             "Quantity 6": 0,
-                                            "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
-                                            "Quantity 9": 0,
+                                            "Quantity 7": row['Quantity'],
+                                            "Quantity 8": 0,
                                             })
 
         if row['Model'] == "Dual-fit cylinder":
@@ -86,8 +86,8 @@ def insert_logistics_orders(selected_rows):
                                             "Quantity 3": row['Quantity'],
                                             "Quantity 4": row['Quantity'], "Quantity 5": row['Quantity'],
                                             "Quantity 6": row['Quantity'],
-                                            "Quantity 7": row['Quantity'] * 4, "Quantity 8": row['Quantity'],
-                                            "Quantity 9": 0,
+                                            "Quantity 7": row['Quantity'],
+                                            "Quantity 8": 0,
                                             })
 
 
@@ -228,7 +228,7 @@ def create_grid():
     order_df = order_df[column_order]
 
     # Apply color function to the "Time gap" column using map
-    styled_order_df = order_df.style.applymap(get_color, subset=['Time gap'])
+    styled_order_df = order_df.style.map(get_color, subset=['Time gap'])
 
     # Get DataFrame row-selections from the user with st.data_editor
     grid_container = st.data_editor(

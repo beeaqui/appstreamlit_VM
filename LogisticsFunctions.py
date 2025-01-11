@@ -4,7 +4,7 @@ from streamlit_autorefresh import st_autorefresh
 import pandas as pd
 
 # Initialize global quantities list
-quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+quantities = [0, 0, 0, 0, 0, 0, 0, 0]
 game2_label = ""
 game1_label = ""
 game1_list = []
@@ -74,9 +74,9 @@ def handle_buttons(game_phase, id_game1, id_game2):
         if start:
             if game_phase == "Game 1":
                 orders = collection19.find({"Order Number": id_game1})
-                quantities = [0] * 9
+                quantities = [0] * 8
                 for order in orders:
-                    for i in range(9):
+                    for i in range(8):
                         quantity_key = f"Quantity {i + 1}"
                         quantities[i] += order.get(quantity_key, 0)
 
@@ -99,8 +99,8 @@ def handle_buttons(game_phase, id_game1, id_game2):
                 orders = collection19.find_one({"Order Number": id_game2})
 
                 if orders is not None:
-                    quantities = [0] * 9
-                    for i in range(9):
+                    quantities = [0] * 8
+                    for i in range(8):
                         quantity_key = f"Quantity {i + 1}"
                         quantities[i] += orders.get(quantity_key, 0)
 
@@ -126,7 +126,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
 
         if stop:
             if game_phase == "Game 1":
-                quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                quantities = [0, 0, 0, 0, 0, 0, 0, 0]
 
                 search = collection19.find_one()
 
@@ -137,7 +137,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
                 else:
                     id_game1 = "Waiting"
                     id_game2 = "Waiting"
-                    quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    quantities = [0, 0, 0, 0, 0, 0, 0, 0]
                 st_autorefresh(limit=2, key=f"{id_game1}")
 
                 numbers_list = []
@@ -160,7 +160,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
                     collection23.delete_one({"Number": number})
 
             if game_phase == "Game 2":
-                quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                quantities = [0, 0, 0, 0, 0, 0, 0, 0]
 
                 search = collection19.find_one()
 
@@ -171,7 +171,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
                 else:
                     id_game1 = "Waiting"
                     id_game2 = "Waiting"
-                    quantities = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    quantities = [0, 0, 0, 0, 0, 0, 0, 0]
                 st_autorefresh(limit=2, key=f"{id_game2}")
 
                 numbers_list = []
@@ -198,7 +198,7 @@ def handle_buttons(game_phase, id_game1, id_game2):
 def display_images(game_phase):
     global quantities, game2_label, game1_label, game1_list, game2_list
 
-    if quantities == [0, 0, 0, 0, 0, 0, 0, 0, 0]:
+    if quantities == [0, 0, 0, 0, 0, 0, 0, 0]:
         st.caption(f"Waiting for the next order to pick.")
 
     else:
@@ -296,7 +296,7 @@ def display_images(game_phase):
     images = [
         'barrel.png', 'bearing_cap.png', 'push_L_fitting.png',
         'piston.png', 'end_cap.png', 'push_in_fitting.png',
-        'screw.png', 'nut.png', 'swivel_flange.png']
+        'nut.png', 'swivel_flange.png']
 
     columns = st.columns(3, gap='medium')
 

@@ -43,7 +43,7 @@ collection25 = db['DelayedOrders']
 collection26 = db['FlowProcessKPI']
 
 
-def update_time_gap():
+def update_delivery_date():
     try:
         # Read the CSV file into memory
         with file_path.open('r') as file:
@@ -54,104 +54,41 @@ def update_time_gap():
         return  # Exit the function if there's an error opening the file
 
     updated_rows = []
+    current_time = datetime.datetime.now()  # Capture the current timestamp once
+
     for row in rows:
-        # Fetch the delivery_date from the CSV, which is in the format "HH:MM h"
-        delivery_date_str = row['delivery_date']  # Example: "00:27 h"
+        # Generate random future delivery time within 1 to 12 minutes
+        random_minutes = random.randint(3, 15)
+        product_delivery_date = current_time + datetime.timedelta(minutes=random_minutes)
 
-        # Remove the " h" and split by ':'
-        time_parts = delivery_date_str.replace(' h', '').split(':')
-        hours = int(time_parts[0])
-        minutes = int(time_parts[1])
+        # Format and update the delivery date
+        row['delivery_date'] = product_delivery_date.strftime('%H:%M') + ' h'
 
-        # Create a timedelta object from hours and minutes
-        delivery_timedelta = datetime.timedelta(hours=hours, minutes=minutes)
-
-        # Calculate the product delivery date based on the current time and the timedelta
-        product_delivery_date = datetime.datetime.now() + delivery_timedelta
-        print(product_delivery_date)
-
-        # Format the product delivery date for display
-        delivery_date = product_delivery_date.strftime('%H:%M') + ' h'
-
-        # Calculate time gap between current time and delivery date
-        current_date = datetime.datetime.now()
-        time_gap = product_delivery_date - current_date
+        # Calculate time gap between current time and product delivery date
+        time_gap = product_delivery_date - current_time
         total_seconds = time_gap.total_seconds()
+        hours_gap = int(total_seconds // 3600)
+        minutes_gap = int((total_seconds % 3600) // 60)
 
-        # Convert seconds to hours and minutes
-        hours = int(total_seconds // 3600)
-        minutes = int((total_seconds % 3600) // 60)
+        # Format the time gap
+        time_gap_formatted = f"{hours_gap:02d}:{minutes_gap:02d} h"
+        row['time_gap'] = time_gap_formatted  # Store or update the time gap in the row if needed
 
-        # Format the time gap as "hours:minutes h"
-        time_gap_formatted = f"{hours:02d}:{minutes:02d} h"
-
-        # Update the delivery_date and time_gap fields in the row
-        row['time_gap'] = time_gap_formatted
-
-        # Append the updated row to the list
         updated_rows.append(row)
 
-    # Write the updated data back to the CSV file
+    # Write updated rows back to the CSV file
     with file_path.open('w', newline='') as file:
         fieldnames = reader.fieldnames
         writer = csv.DictWriter(file, fieldnames=fieldnames)
-
-        # Write the header
         writer.writeheader()
-        # Write the updated rows
         writer.writerows(updated_rows)
 
-
-def update_delivery_date_and_time_gap():
-    try:
-        # Read the CSV file into memory
-        with file_path.open('r') as file:
-            reader = csv.DictReader(file)
-            rows = list(reader)  # Read all rows into a list
-    except Exception as e:
-        print("Error:", e)
-        return  # Exit the function if there's an error opening the file
-
-    updated_rows = []
-    for row in rows:
-        # Fetch the delivery_date from the CSV, which is in the format "HH:MM h"
-        delivery_date_str = row['delivery_date']  # Example: "00:27 h"
-
-        # Remove the " h" and split by ':'
-        time_parts = delivery_date_str.replace(' h', '').split(':')
-        hours = int(time_parts[0])
-        minutes = int(time_parts[1])
-
-        # Create a timedelta object from hours and minutes
-        delivery_timedelta = datetime.timedelta(hours=hours, minutes=minutes)
-
-        # Calculate the product delivery date based on the current time and the timedelta
-        product_delivery_date = datetime.datetime.now() + delivery_timedelta
-        print(product_delivery_date)
-
-        # Format the product delivery date for display
-        delivery_date = product_delivery_date.strftime('%H:%M') + ' h'
-
-        # Calculate time gap between current time and delivery date
-        current_date = datetime.datetime.now()
-        time_gap = product_delivery_date - current_date
-        total_seconds = time_gap.total_seconds()
-
-        # Convert seconds to hours and minutes
-        hours = int(total_seconds // 3600)
-        minutes = int((total_seconds % 3600) // 60)
-
-        # Format the time gap as "hours:minutes h"
-        time_gap_formatted = f"{hours:02d}:{minutes:02d} h"
-
-        # Update the delivery_date and time_gap fields in the row
-        row['delivery_date'] = delivery_date
-        row['time_gap'] = time_gap_formatted
-
-        # Append the updated row to the list
-        updated_rows.append(row)
-
-    return updated_rows
+    # Write updated rows back to the file
+    with file_path.open('w', newline='') as file:
+        fieldnames = rows[0].keys()
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(updated_rows)
 
 
 def read_orders_from_csv():
@@ -160,43 +97,45 @@ def read_orders_from_csv():
     orders = []
     for document in cursor:
         if document['Game Phase'] == "Game 1":
-            rows = update_delivery_date_and_time_gap()
+            with file_path.open(mode='r') as file:
+                csv_reader = csv.DictReader(file)
 
-            for row in rows:
-                orders.append(Order(
-                    str(row['number']),
-                    row['order_line'],
-                    int(row['reference']),
-                    row['delivery_date'],
-                    row['time_gap'],
-                    row['description'],
-                    row['model'],
-                    int(row['quantity']),
-                    row['color'],
-                    row['dimensions']
-                ))
-            if not orders:
-                return None
-
-        elif document['Game Phase'] == "Game 2":
-            rows = update_delivery_date_and_time_gap()
-
-            for row in rows:
-                i = 0
-                for i in range(int(row['quantity'])):
-                    picker = str(i + 1)
+                for row in csv_reader:
                     orders.append(Order(
-                        str(picker + '/' + row['quantity']),
-                        str(row['number'] + '.' + picker),
+                        str(row['number']),
+                        row['order_line'],
                         int(row['reference']),
                         row['delivery_date'],
                         row['time_gap'],
                         row['description'],
                         row['model'],
-                        int(1),  # quantity
+                        int(row['quantity']),
                         row['color'],
                         row['dimensions']
                     ))
+                if not orders:
+                    return None
+
+        elif document['Game Phase'] == "Game 2":
+            with file_path.open(mode='r') as file:
+                csv_reader = csv.DictReader(file)
+
+                for row in csv_reader:
+                    i = 0
+                    for i in range(int(row['quantity'])):
+                        picker = str(i + 1)
+                        orders.append(Order(
+                            str(picker + '/' + row['quantity']),
+                            str(row['number'] + '.' + picker),
+                            int(row['reference']),
+                            row['delivery_date'],
+                            row['time_gap'],
+                            row['description'],
+                            row['model'],
+                            int(1),  # quantity
+                            row['color'],
+                            row['dimensions']
+                        ))
 
         else:
             return None
@@ -231,7 +170,8 @@ def run():
         collection25.drop()
         collection26.drop()
 
-        update_time_gap()
+        # update_time_gap()
+        update_delivery_date()
         order = read_orders_from_csv()
 
         row_count = 0

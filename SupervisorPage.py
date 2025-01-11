@@ -33,6 +33,7 @@ def game_phase_config(game_option):
 
 
 def game_mode_config(game_mode):
+    print(game_mode, " was pressed")
     collection24.update_one({}, {'$set': {'Game Mode': game_mode}}, upsert=True)
 
 
@@ -60,7 +61,7 @@ def conf2(configuration2):
         collection16.insert_one({'High Priority': hours})
 
     else:
-        configuration_default = 0.08333
+        configuration_default = 0.09
         collection16.insert_one({'High Priority': configuration_default})
 
 
@@ -76,7 +77,7 @@ def conf3(configuration3):
         collection17.insert_one({'Medium Priority': hours})
 
     else:
-        configuration_default = 0.13333
+        configuration_default = 0.14
         collection17.insert_one({'Medium Priority': configuration_default})
 
 
@@ -150,7 +151,6 @@ def supervisor_page():
                 db['AssemblyOrders'].drop()
                 db['AssemblyOrdersProcess'].drop()
                 db['SaveOrdersLogistics'].drop()
-                db['GameStartStop'].drop()
                 db['DelayedOrders'].drop()
                 db['FlowProcessKPI'].drop()
 

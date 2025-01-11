@@ -32,7 +32,6 @@ collection26 = db['FlowProcessKPI']
 
 
 def kpis_orders():
-
     orders_concluded = list(collection7.find())
     time_released = list(collection9.find())
     collection9.delete_many({"Order Number": ""})
@@ -140,7 +139,7 @@ def kpis_orders():
 
     # Create DataFrame
     df = pd.DataFrame(data)
-    styled_df = df.style.applymap(color_delay, subset=['Delay'])
+    styled_df = df.style.map(color_delay, subset=['Delay'])
 
     # Display with st.data_editor
     st.data_editor(styled_df, hide_index=True, disabled=True, use_container_width=True)
@@ -153,6 +152,7 @@ def update_timer():
 
         start_timer_js = ""
         pause_timer_js = ""
+        clear_timer_js = ""
 
         # If game_mode is "Start", reset and then start the timer
         if game_mode == "Start":
@@ -167,7 +167,7 @@ def update_timer():
                 """
 
         elif game_mode == "Clear":
-            start_timer_js = """
+            clear_timer_js = """
                     resetTimer();
                 """
 
@@ -259,6 +259,7 @@ def update_timer():
 
                             {start_timer_js}
                             {pause_timer_js}
+                            {clear_timer_js}
                         }});
                     </script>
                 </body>
