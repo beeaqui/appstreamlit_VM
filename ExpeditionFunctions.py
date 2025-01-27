@@ -14,7 +14,7 @@ collection11 = db['TimeExpeditionEnd']
 
 
 def find_expedition_orders():
-    expedition_orders = collection6.find({}, {'_id': 0, 'Number': 1, 'Order line': 1,
+    expedition_orders = collection6.find({}, {'_id': 0, 'Number': 1, 'Order Line': 1,
                                               'Reference': 1, 'Delivery date': 1, 'Description': 1, 'Model': 1,
                                               'Quantity': 1, 'Color': 1, 'Dimensions': 1})
 
@@ -26,7 +26,7 @@ def delete_expedition_order(db, order_number):
 
 
 def concluded_orders(db, order_number):
-    collection7.insert_one({'Number': order_number['Number'], 'Order line': order_number['Order line'],
+    collection7.insert_one({'Number': order_number['Number'], 'Order Line': order_number['Order Line'],
                             'Reference': order_number['Reference'], 'Delivery date': order_number['Delivery date'],
                             'Description': order_number['Description'], 'Model': order_number['Model'],
                             'Quantity': order_number['Quantity'], 'Color': order_number['Color'],
@@ -41,12 +41,11 @@ def display_tables_expedition():
     rows_df = pd.DataFrame(list(expedition_orders))
 
     if 'Quantity' in rows_df.columns:
-        columns = ['Number', 'Order line', 'Reference', 'Quantity', 'Delivery date', 'Model',
+        columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery date', 'Model',
                    'Description', 'Color', 'Dimensions']
         rows_df = rows_df.reindex(columns=columns)
 
-        # Rearranging the columns as per the specified order
-        column_order = ['Number', 'Order line', 'Delivery date',
+        column_order = ['Number', 'Order Line', 'Delivery date',
                         'Quantity', 'Model', 'Reference', 'Description', 'Color', 'Dimensions']
         rows_df = rows_df[column_order]
 
@@ -67,7 +66,7 @@ def display_tables_expedition():
                     f"border-radius: 10px; "
                     f"margin-top: 50px; "
                     f"margin-bottom: 10px;'>"
-                    f"Details - Number {expedition_order['Number']}</div>",
+                    f"Details - Number {expedition_order['Order Line']}</div>",
                     unsafe_allow_html=True)
 
                 data = []
@@ -81,13 +80,20 @@ def display_tables_expedition():
 
                 c1, c2, c3 = st.columns(3)
                 with c2:
-                    confirm = st.button('Dispatch', key=f'{expedition_order}', type='primary')
+                    if f"button_ship{expedition_order['Order Line']}" in st.session_state and st.session_state[
+                        f"button_ship{expedition_order['Order Line']}"] is True:
+                        st.session_state.running = True
+                    else:
+                        st.session_state.running = False
+
+                    confirm = st.button('Dispatch', key=f"button_ship{expedition_order['Order Line']}",
+                                        type='primary')
                     if confirm:
                         concluded_orders(db, expedition_order)
                         insert_confirmation_data(expedition_order['Number'])
                         delete_expedition_order(db, expedition_order['Number'])
 
-                        st.toast(f"Order number {expedition_order['Number']} has been successfully shipped",
+                        st.toast(f"Order number {expedition_order['Order Line']} has been successfully shipped",
                                  icon='✔️')
                         st_autorefresh(limit=2, key=f"{expedition_order['Number']}")
                         cumulative_finished_orders(db)
@@ -98,12 +104,12 @@ def insert_confirmation_data(order_number):
     current_date = current_datetime.strftime("%Y-%m-%d")
     current_time = current_datetime.strftime("%H:%M:%S")
 
-    order_data = collection6.find_one({'Number': order_number}, {'_id': 0, 'Order line': 1})
-    order_line = order_data.get('Order line', 'No Order Line Provided')
+    order_data = collection6.find_one({'Number': order_number}, {'_id': 0, 'Order Line': 1})
+    order_line = order_data.get('Order Line', 'No Order Line Provided')
 
     data_to_insert = {
         'Order Number': order_number,
-        'Order line': order_line,
+        'Order Line': order_line,
         'Total Orders': 1,
         'End Expedition Time': {
             'Date': current_date,

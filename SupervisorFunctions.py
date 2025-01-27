@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import operator
+import re
 
 from pymongo import MongoClient
 from datetime import datetime
@@ -39,16 +40,13 @@ def kpis_orders():
     count = collection7.count_documents({})
     color: str = ''
 
-    # Parse a time string like 17:30 h into a time object
     def parse_time(time_str):
         if time_str and isinstance(time_str, str):
-            # Remove any trailing ' h' and ensure it contains only the time part
-            time_str_cleaned = time_str.split(' ')[0]  # Get just the 'HH:MM' or 'HH:MM:SS' part
+            time_str_cleaned = time_str.split(' ')[0]
 
-            # Check if the string contains seconds
-            if len(time_str_cleaned.split(':')) == 3:  # Format is HH:MM:SS
+            if len(time_str_cleaned.split(':')) == 3:
                 return datetime.strptime(time_str_cleaned, "%H:%M:%S").time()
-            else:  # Format is HH:MM
+            else:
                 return datetime.strptime(time_str_cleaned, "%H:%M").time()
         return None
 
@@ -56,23 +54,22 @@ def kpis_orders():
         return datetime.strptime(datetime_dict['Time'], "%H:%M").time()
 
     def time_to_minutes(time_obj):
-        return time_obj.hour * 60 + time_obj.minute
+        return time_obj.hour * 60 + time_obj.minute + time_obj.second / 60
 
-    # Prepare data for the DataFrame - orders released
     data = []
     if count != 0:
         for order in orders_concluded:
             order_number = str(order.get('Number', None))
-            order_line = str(order.get('Order line', None))
-            order_delivery_str = order.get('Delivery date', None)  # Delivery date is expected to be a dictionary
+            order_line = str(order.get('Order Line', None))
+            order_delivery_str = order.get('Delivery date', None)
 
             release_entry = next((r for r in time_released
                                   if r['Order Number'] == order_number and r['Order Line'] == order_line), None)
 
             if release_entry:
                 released_time_dict = release_entry['Released Order Time']
-                release_time_str = released_time_dict.get('Time', '')  # Get the 'Time' part
-                release_time = parse_time(release_time_str)  # Parse the time string
+                release_time_str = released_time_dict.get('Time', '')
+                release_time = parse_time(release_time_str)
                 release_time_display = release_time.strftime("%H:%M") + ' h'
             else:
                 release_time = None
@@ -80,28 +77,26 @@ def kpis_orders():
 
             finish_entry = next(
                 (f for f in time_finished if f['Order Number'] == str(order_number)
-                 and f['Order line'] == str(order_line)), None)
+                 and f['Order Line'] == str(order_line)), None)
 
             if finish_entry:
                 finish_time_dict = finish_entry['End Expedition Time']
-                finish_time_str = finish_time_dict.get('Time', '')  # Get the 'Time' part
+                finish_time_str = finish_time_dict.get('Time', '')
                 finish_time = parse_time(finish_time_str)
                 finish_time_display = finish_time.strftime("%H:%M") + ' h'
             else:
                 finish_time = None
                 finish_time_display = 'Waiting'
 
-            # Parse delivery time
             order_delivery_time = parse_time(order_delivery_str) if order_delivery_str else None
 
-            # Calculate lead time (in minutes) and delay (based on the difference in minutes)
             if release_time and finish_time:
-                leadtime = time_to_minutes(finish_time) - time_to_minutes(release_time)
+                leadtime = round(time_to_minutes(finish_time) - time_to_minutes(release_time), 2)
             else:
                 leadtime = None
 
             if finish_time and order_delivery_time:
-                delay = time_to_minutes(finish_time) - time_to_minutes(order_delivery_time)
+                delay = round(time_to_minutes(finish_time) - time_to_minutes(order_delivery_time), 2)
             else:
                 delay = None
 
@@ -114,16 +109,16 @@ def kpis_orders():
                 collection26.insert_one({'Flow delayed orders': flow_process_kpi})
 
             data.append({'Number': order_number if order_number else '-',
-                         'Order line': order_line if order_line else '-',
+                         'Order Line': order_line if order_line else '-',
                          'Delivery date': order_delivery_str if order_delivery_str else '-',
                          'Release time': release_time_display,
                          'Finishing time': finish_time_display,
-                         'Leadtime': leadtime if leadtime is not None else '-',
-                         'Delay': delay if delay is not None else '-'})
+                         'Leadtime': f"{leadtime:.2f} min" if leadtime is not None else '-',
+                         'Delay': f"{delay:.2f} min" if delay is not None else '-'})
 
     else:
         data.append({'Number': '-',
-                     'Order line': '-',
+                     'Order Line': '-',
                      'Delivery date': '-',
                      'Release time': '-',
                      'Finishing time': '-',
@@ -131,17 +126,16 @@ def kpis_orders():
                      'Delay': '-'})
 
     def color_delay(delay):
-        if isinstance(delay, int) and delay > 0:
+        delay = float(re.sub(r'[^\d.-]', '', str(delay))) if delay != '-' else None
+        if isinstance(delay, float) and delay > 0:
             return 'background-color: rgb(207, 119, 116);'
-        elif isinstance(delay, int) and delay <= 0:
+        elif isinstance(delay, float) and delay <= 0:
             return 'background-color: rgb(153, 148, 119);'
         return 'background-color: rgb(255, 255, 255);'
 
-    # Create DataFrame
     df = pd.DataFrame(data)
-    styled_df = df.style.applymap(color_delay, subset=['Delay'])
 
-    # Display with st.data_editor
+    styled_df = df.style.applymap(color_delay, subset=['Delay'])
     st.data_editor(styled_df, hide_index=True, disabled=True, use_container_width=True)
 
 
@@ -154,13 +148,11 @@ def update_timer():
         pause_timer_js = ""
         clear_timer_js = ""
 
-        # If game_mode is "Start", reset and then start the timer
         if game_mode == "Start":
             start_timer_js = """
                     startTimer();
                 """
 
-        # If game_mode is "Stop", pause the timer
         elif game_mode == "Stop":
             pause_timer_js = """
                     pauseTimer();
@@ -299,10 +291,8 @@ def find_intersections_trajectory(coefficients, x_coefficients, y_coefficients):
                     pair_intersection = \
                         np.linalg.lstsq(augmented_matrix[:, :-1], augmented_matrix[:, -1], rcond=None)[
                             0]
-                    # Convert -0.0 to 0.0
                     pair_intersection = [0.0 if abs(coord) < 1e-10 else coord for coord in pair_intersection]
 
-                    # Check for duplicates
                     if pair_intersection not in intersections:
                         intersections.append(pair_intersection)
 
@@ -385,17 +375,13 @@ def linear_programming_trajectory(coefficients, x_coefficients, y_coefficients,
 
 def data_leadtime():
     result = []
-
     for order_info_9 in collection9.find():
-        order_number_9 = order_info_9["Order Number"]
+        order_number_9 = order_info_9["Order Line"]
 
         for order_info_11 in collection11.find():
-            order_number_11 = order_info_11["Order Number"]
+            order_number_11 = order_info_11["Order Line"]
 
-            common_orders = set(order_number_9) & set(order_number_11)
-
-            if common_orders:
-                common_order = common_orders.pop()
+            if order_number_9 == order_number_11:
 
                 released_order_time = datetime.strptime(
                     order_info_9["Released Order Time"]["Date"] + " " + order_info_9["Released Order Time"]["Time"],
@@ -408,9 +394,10 @@ def data_leadtime():
                 )
 
                 lead_time_seconds = ((end_expedition_time - released_order_time).total_seconds())
+                lead_time_minutes = max(0, lead_time_seconds / 60)
 
                 result.append({
-                    "Order Number": common_order,
+                    "Order Line": order_number_9,
                     "Released Order Time": {
                         "Date": order_info_9["Released Order Time"]["Date"],
                         "Time": order_info_9["Released Order Time"]["Time"]
@@ -419,21 +406,22 @@ def data_leadtime():
                         "Date": order_info_11["End Expedition Time"]["Date"],
                         "Time": order_info_11["End Expedition Time"]["Time"]
                     },
-                    "Lead Time": lead_time_seconds
+                    "Lead Time (min)": lead_time_minutes
                 })
 
-                collection12.insert_one({
-                    "Order Number": [common_order],
-                    "Released Order Time": {
-                        "Date": order_info_9["Released Order Time"]["Date"],
-                        "Time": order_info_9["Released Order Time"]["Time"]
-                    },
-                    "End Expedition Time": {
-                        "Date": order_info_11["End Expedition Time"]["Date"],
-                        "Time": order_info_11["End Expedition Time"]["Time"]
-                    },
-                    "Lead Time": lead_time_seconds
-                })
+                if collection12.count_documents({"Order Line": order_number_9}) == 0:
+                    collection12.insert_one({
+                        "Order Line": order_number_9,
+                        "Released Order Time": {
+                            "Date": order_info_9["Released Order Time"]["Date"],
+                            "Time": order_info_9["Released Order Time"]["Time"]
+                        },
+                        "End Expedition Time": {
+                            "Date": order_info_11["End Expedition Time"]["Date"],
+                            "Time": order_info_11["End Expedition Time"]["Time"]
+                        },
+                        "Lead Time (min)": lead_time_minutes
+                    })
 
     return result
 
@@ -465,7 +453,7 @@ def cumulative_finished_orders():
 
         order_number = order["Number"]
         if order_number in existing_orders:
-            # print(f"Order {order_number} already exists in collection13. Skipping...")
+            # print(f"Order {order_number} already exists in collection13. Skip")
             continue
 
         coordinates_x_y = (f"{cumulative_quantities['Quantity Complex']}, "
@@ -509,14 +497,14 @@ def cumulative_wip_plot_data():
 
 def calculate_time_difference_wip(df, starting_point):
     if not df.empty:
-        df['TimeInSeconds'] = (df['Time'] - starting_point).dt.total_seconds()
-        return df[['Cumulative Orders', 'TimeInSeconds']]
+        df['TimeInMinutes'] = (df['Time'] - starting_point).dt.total_seconds() / 60
+        return df[['Cumulative Orders', 'TimeInMinutes']]
 
 
 def create_trace_wip(df, name, color):
     if df is not None and not df.empty:
         return go.Scatter(
-            x=df['TimeInSeconds'],
+            x=df['TimeInMinutes'],
             y=df['Cumulative Orders'],
             mode='lines+markers',
             name=name,
@@ -524,8 +512,8 @@ def create_trace_wip(df, name, color):
             marker=dict(color=color, size=5),
             hoverinfo='text',
             line_shape='hv',
-            hovertext=[f'Time (sec): {time} <br>Cumulative orders: {orders}'
-                       for time, orders in zip(df['TimeInSeconds'], df['Cumulative Orders'])])
+            hovertext=[f'Time (min): {time} <br>Cumulative orders: {orders}'
+                       for time, orders in zip(df['TimeInMinutes'], df['Cumulative Orders'])])
 
     else:
         return go.Scatter(
@@ -547,7 +535,7 @@ def plot_generated_orders(width_plot):
     plotly_df = pd.DataFrame({'Time': [], 'Numbers': []})
 
     if df.empty:
-        df = {'Numbers': [], 'Time (seconds)': []}
+        df = {'Quantity': [], 'Time (min)': []}
 
     if data:
         df['Generated Cust_Order'] = pd.to_datetime(
@@ -563,7 +551,7 @@ def plot_generated_orders(width_plot):
 
         cumulative_orders = list(pd.Series(orders_count).cumsum())
 
-        x_labels = [int((t - time_intervals[0]).seconds) for t in time_intervals]
+        x_labels = [(t - time_intervals[0]).seconds / 60 for t in time_intervals]
 
         plotly_df = pd.DataFrame({'Time': x_labels, 'Numbers': cumulative_orders})
 
@@ -582,33 +570,20 @@ def plot_generated_orders(width_plot):
                   line_shape='hv',
                   color_discrete_sequence=['rgb(49, 90, 146)'])
 
-    fig.update_layout(
-        width=width_plot,
-        title=dict(
-            text='Order generation status',
-            x=0.5,  # Center the title
-            xanchor='center'  # Anchor the title to the center
-        ),
-        xaxis=dict(
-            tickfont=dict(color='black'), title=dict(text='Time (sec)', font_color='black'),
-            showline=False,
-            showgrid=False,
-            showticklabels=True),
-        yaxis=dict(
-            tickfont=dict(color='black'), title=dict(text='Numbers', font_color='black'),
-            showline=False,
-            showgrid=True,
-            showticklabels=True),
+    fig.update_traces(hovertemplate=(f'<b><span style="color:rgb(49, 90, 146);">Orders generated: </span></b>'
+                                     f'<span style="color:black;">%{{y}}</span><br>'
+                                     f'<b><span style="color:rgb(49, 90, 146);">Time (min):</span></b> '
+                                     f'<span style="color:black;">%{{x:.2f}}</span><br>'), name='')
 
+    fig.update_layout(
+        xaxis=dict(tickfont=dict(color='black'), title=dict(text='Time (min)', font_color='black'),
+                   showline=False, showgrid=False, showticklabels=True),
+        yaxis=dict(tickfont=dict(color='black'), title=dict(text='Quantity', font_color='black'),
+                   showline=False, showgrid=True, showticklabels=True),
+        title=dict(text='Order generation status', x=0.5, xanchor='center', yanchor='top'),
         showlegend=False,
-        dragmode=False,
-        hovermode="x unified",
-        modebar=dict(
-            orientation='v',  # Vertical modebar position
-            bgcolor='rgba(0,0,0,0)',  # Transparent modebar
-            activecolor='rgb(0,0,0,0)',  # Transparent active color
-            color='rgba(0,0,0,0)',  # Transparent inactive color
-        ))
+        width=width_plot,
+        dragmode=False)
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -625,47 +600,39 @@ def wip_plot(width_plot):
     new_plot_data_order_released = calculate_time_difference_wip(plot_data_order_released, starting_point)
     new_plot_data_production_finished = calculate_time_difference_wip(plot_data_production_finished, starting_point)
 
-    trace1 = create_trace_wip(new_plot_data_order_released, 'Input orders', 'rgb(166, 58, 80)')
-    trace2 = create_trace_wip(new_plot_data_production_finished, 'Output orders', 'rgb(21, 96, 100)')
+    colors = ['rgb(166, 58, 80)', 'rgb(21, 96, 100)']
+
+    trace1 = create_trace_wip(new_plot_data_order_released, 'Input orders', colors[0])
+    trace2 = create_trace_wip(new_plot_data_production_finished, 'Output orders', colors[1])
+
+    trace1.update(hovertemplate=(f'<b><span style="color:{colors[0]};">Order type: </span></b>'
+                                 f'<span style="color:black;">Input orders</span><br>'
+                                 f'<b><span style="color:{colors[0]};">Cumulative orders:</span></b> '
+                                 f'<span style="color:black;">%{{y}}</span><br>'
+                                 f'<b><span style="color:{colors[0]};">Time (min):</span></b> '
+                                 f'<span style="color:black;">%{{x:.2f}}</span><br>'), name='')
+
+    trace2.update(hovertemplate=(f'<b><span style="color:{colors[1]};">Order type: </span></b>'
+                                 f'<span style="color:black;">Output orders</span><br>'
+                                 f'<b><span style="color:{colors[1]};">Cumulative orders:</span></b> '
+                                 f'<span style="color:black;">%{{y}}</span><br>'
+                                 f'<b><span style="color:{colors[1]};">Time (min):</span></b> '
+                                 f'<span style="color:black;">%{{x:.2f}}</span><br>'), name='')
 
     fig = go.Figure(data=[trace1, trace2])
 
     fig.update_layout(
         xaxis=dict(
-            tickfont=dict(color='black'),
-            title=dict(text='Time (seconds)', font_color='black'),
-            showline=False,
-            showgrid=False,
-            showticklabels=True
-        ),
+            tickfont=dict(color='black'), title=dict(text='Time (min)', font_color='black'),
+            showline=False, showgrid=False, showticklabels=True),
         yaxis=dict(
-            tickfont=dict(color='black'),
-            title=dict(text='Cumulative orders', font_color='black'),
-            showline=False,
-            showgrid=True,
-            showticklabels=True
-        ),
-        title=dict(
-            text='Cumulative order progress',
-            x=0.5,  # Center the title
-            xanchor='center'  # Anchor the title to the center
-        ),
-        hovermode='x unified',
+            tickfont=dict(color='black'), title=dict(text='Cumulative orders', font_color='black'),
+            showline=False, showgrid=True, showticklabels=True),
+        title=dict(text='Cumulative order progress', x=0.5, xanchor='center'),
         width=width_plot,
-        showlegend=True,
-        legend=dict(
-            x=0.7,  # Center horizontally
-            y=1.15,  # Position legend below the graph (negative value moves it inside)
-            traceorder='normal',
-            orientation='v',  # Horizontal orientation
-        ),
-        dragmode=False,
-        modebar=dict(
-            orientation='v',
-            bgcolor='rgba(0,0,0,0)',
-            activecolor='rgba(0,0,0,0)',
-            color='rgba(0,0,0,0)', )
-    )
+        showlegend=False,
+        dragmode=False)
+
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -678,20 +645,20 @@ def quality_distribution_plot(width_plot):
 
     fig = go.Figure()
 
-    fig.add_trace(go.Bar(
-        y=df['Quantity'],
-        x=df['Quality'],
-        orientation='v',
-        marker=dict(color=['rgb(21, 96, 100)', 'rgb(219, 173, 106)'])
-    ))
+    bar_colors = ['rgb(21, 96, 100)', 'rgb(219, 173, 106)']
+
+    for i in range(2):
+        fig.add_trace(go.Bar(
+            y=[df['Quantity'][i]], x=[df['Quality'][i]],
+            orientation='v', marker=dict(color=bar_colors[i]), name='',
+            hovertemplate=(f'<b><span style="color:{bar_colors[i]};">Quality status: </span></b>'
+                           f'<span style="color:black;">%{{x}}</span><br>'
+                           f'<b><span style="color:{bar_colors[i]};">Quantity:</span></b> '
+                           f'<span style="color:black;">%{{y}}</span><br>')))
 
     fig.update_layout(
         width=width_plot,
-        title=dict(
-            text='Quality distribution',
-            x=0.5,  # Center the title
-            xanchor='center'  # Anchor the title to the center
-        ),
+        title=dict(text='Quality distribution', x=0.5, xanchor='center'),
         xaxis=dict(
             tickfont=dict(color='black'), title=dict(text='Quality status', font_color='black'),
             showline=False,
@@ -702,17 +669,7 @@ def quality_distribution_plot(width_plot):
             showline=False,
             showgrid=True,
             showticklabels=True),
-
-        showlegend=False,
-        dragmode=False,
-        hovermode="x unified",
-        modebar=dict(
-            orientation='v',  # Vertical modebar position
-            bgcolor='rgba(0,0,0,0)',  # Transparent modebar
-            activecolor='rgb(0,0,0,0)',  # Transparent active color
-            color='rgba(0,0,0,0)',  # Transparent inactive color
-        )
-    )
+        showlegend=False)
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -721,52 +678,51 @@ def leadtime_plot(width_plot):
     collection12.drop()
 
     result = data_leadtime()
-    lead_time_data = [doc["Lead Time"] for doc in collection12.find()]
+    lead_time_data = [doc["Lead Time (min)"] for doc in collection12.find()]
 
     df = pd.DataFrame(result)
 
-    if df.empty:
-        df = {'Order Number': [],
-              'Lead Time': []}
+    if result:
+        df = pd.DataFrame(result)
+    else:
+        df = pd.DataFrame({'Order Line': [], 'Lead Time (min)': []})
 
-    # Create a bar chart using Plotly Express
+    if not df.empty:
+        df['Lead Time (min)'] = df['Lead Time (min)'].applymap(lambda x: f"{x:.2f}")
+        df['Order Line'] = pd.Categorical(df['Order Line'], ordered=True)
 
-    fig = px.bar(df, x='Order Number', y='Lead Time', orientation='v',
+    fig = px.bar(df, x='Order Line', y='Lead Time (min)', orientation='v',
                  title='Orders lead time analysis',
-                 labels={'Lead Time': 'Lead time (sec)', 'Order Number': 'Order number'})
+                 labels={'Lead Time (min)': 'Lead time (min)', 'Order Line': 'Order number'})
 
     # Customize the layout
     fig.update_traces(marker_color='rgb(49, 90, 146)', marker_line_color='rgb(49, 90, 146)',
-                      marker_line_width=1.5, opacity=1)
+                      marker_line_width=1.5, opacity=1,
+                      hovertemplate='<b><span style="color:rgb(49, 90, 146);">Order number:</span></b> '
+                                    '<span style="color:black;">%{x}</span><br>'
+                                    '<b><span style="color:rgb(49, 90, 146);">Lead time:</span></b> '
+                                    '<span style="color:black;">%{y} min</span><br>')
 
     fig.update_layout(
         width=width_plot,
         title=dict(
             text='Orders lead time analysis',
-            x=0.5,  # Center the title
-            xanchor='center'  # Anchor the title to the center
-        ),
+            x=0.5,
+            xanchor='center'),
         xaxis=dict(
             tickfont=dict(color='black'), title=dict(text='Order number', font_color='black'),
             showline=False,
             showgrid=False,
-            showticklabels=True),
+            showticklabels=True,
+            type='category'),
         yaxis=dict(
-            tickfont=dict(color='black'), title=dict(text='Lead time (sec)', font_color='black'),
+            tickfont=dict(color='black'), title=dict(text='Lead time (min)', font_color='black'),
             showline=False,
             showgrid=True,
             showticklabels=True),
-        showlegend=False,
-        dragmode=False, hovermode="x unified",
-        modebar=dict(
-            orientation='v',  # Vertical modebar position
-            bgcolor='rgba(0,0,0,0)',  # Transparent modebar
-            activecolor='rgb(0,0,0,0)',  # Transparent active color
-            color='rgba(0,0,0,0)',  # Transparent inactive color
-        )
-    )
+        showlegend=True,
+        dragmode=False)
 
-    # Display the chart using Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -776,45 +732,30 @@ def orders_distribution_plot(width_plot):
     quality_orders = collection3.count_documents({})
     expedition_orders = collection6.count_documents({})
 
-    df = {
-        'Workstation': ['Production', 'Logistics', 'Quality', 'Expedition'],
-        'Quantity': [production_orders, logistics_orders, quality_orders, expedition_orders]
-    }
+    df = {'Workstation': ['Production', 'Logistics', 'Quality', 'Expedition'],
+          'Quantity': [production_orders, logistics_orders, quality_orders, expedition_orders]}
 
-    fig = px.bar(df, x='Workstation', y='Quantity',
-                 orientation='v',
-                 title='Workstations order distribution',
-                 color='Workstation',
-                 color_discrete_sequence=['rgb(166, 58, 80)', 'rgb(49, 90, 146)',
-                                          'rgb(219, 173, 106)', 'rgb(21, 96, 100)'])
+    bar_colors = ['rgb(166, 58, 80)', 'rgb(49, 90, 146)', 'rgb(219, 173, 106)', 'rgb(21, 96, 100)']
+    fig = px.bar(df, x='Workstation', y='Quantity', orientation='v',
+                 title='Workstations order distribution', color='Workstation',
+                 color_discrete_sequence=bar_colors)
+
+    for i, color in enumerate(bar_colors):
+        fig.data[i].update(hovertemplate=(f'<b><span style="color:{color};">Workstation:</span></b> '
+                                          f'<span style="color:black;">%{{x}}</span><br>'
+                                          f'<b><span style="color:{color};">Quantity:</span></b> '
+                                          f'<span style="color:black;">%{{y}}</span><br>'), name='')
 
     fig.update_layout(
         width=width_plot,
-        title=dict(
-            text='Workstations order distribution',
-            x=0.5,  # Center the title
-            xanchor='center'  # Anchor the title to the center
-        ),
-        xaxis=dict(
-            tickfont=dict(color='black'), title=dict(text='Workstation', font_color='black'),
-            showline=False,
-            showgrid=False,
-            showticklabels=True),
-        yaxis=dict(
-            tickfont=dict(color='black'), title=dict(text='Quantity', font_color='black'),
-            showline=False,
-            showgrid=True,
-            showticklabels=True),
-        hovermode="x",
+        title=dict(text='Workstations order distribution', x=0.5, xanchor='center'),
+        xaxis=dict(tickfont=dict(color='black'), title=dict(text='Workstation', font_color='black'),
+                   showline=False, showgrid=False, showticklabels=True),
+        yaxis=dict(tickfont=dict(color='black'), title=dict(text='Quantity', font_color='black'),
+                   showline=False, showgrid=True, showticklabels=True),
         showlegend=False,
-        dragmode=False,
-        modebar=dict(
-            orientation='v',  # Vertical modebar position
-            bgcolor='rgba(0,0,0,0)',  # Transparent modebar
-            activecolor='rgb(0,0,0,0)',  # Transparent active color
-            color='rgba(0,0,0,0)',  # Transparent inactive color
-        )
-    )
+        dragmode=False)
+
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -852,47 +793,41 @@ def calculate_delay_orders():
 def plot_delay_orders(width_plot):
     total_delay_orders, without_delay = calculate_delay_orders()
 
-    # Create data for the bar chart
     data = {'Status': ['Orders on time', 'Delayed orders'],
             'Count': [without_delay, total_delay_orders]}
     df = pd.DataFrame(data)
 
     color_map = {'Orders on time': 'rgb(21, 96, 100)', 'Delayed orders': 'rgb(219, 173, 106)'}
-    fig = px.bar(df, x='Status', y='Count', color='Status',
-                 color_discrete_map=color_map,
-                 labels={'Count': 'Quantity'},
-                 title='Order delivery status')
 
-    # Update layout to disable interaction
+    fig = go.Figure()
+
+    for i in range(2):
+        fig.add_trace(go.Bar(
+            x=[df['Status'][i]],
+            y=[df['Count'][i]],
+            orientation='v',
+            marker=dict(color=color_map[df['Status'][i]]),
+            name='',
+            hovertemplate=(
+                f'<b><span style="color:{color_map[df["Status"][i]]};">Order status: </span></b>'
+                f'<span style="color:black;">%{{x}}</span><br>'
+                f'<b><span style="color:{color_map[df["Status"][i]]};">Quantity:</span></b> '
+                f'<span style="color:black;">%{{y}}</span><br>'
+            )
+        ))
+
     fig.update_layout(
         width=width_plot,
-        title=dict(
-            text='Order delivery status',
-            x=0.5,  # Center the title
-            xanchor='center'  # Anchor the title to the center
-        ),
+        title=dict(text='Order delivery status', x=0.5, xanchor='center'),
         xaxis=dict(
             tickfont=dict(color='black'), title=dict(text='Order status', font_color='black'),
-            showline=False,
-            showgrid=False,
-            showticklabels=True),
+            showline=False, showgrid=False, showticklabels=True),
         yaxis=dict(
-            tickfont=dict(color='black'), title=dict(text='Number of orders', font_color='black'),
-            showline=False,
-            showgrid=True,
-            showticklabels=True),
+            tickfont=dict(color='black'), title=dict(text='Quantity', font_color='black'),
+            showline=False, showgrid=True, showticklabels=True),
         showlegend=False,
-        dragmode=False,
-        hovermode="x unified",
-        modebar=dict(
-            orientation='v',  # Vertical modebar position
-            bgcolor='rgba(0,0,0,0)',  # Transparent modebar
-            activecolor='rgb(0,0,0,0)',  # Transparent active color
-            color='rgba(0,0,0,0)',  # Transparent inactive color
-        )
-    )
+        dragmode=False)
 
-    # Display the bar chart using Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
     return total_delay_orders, without_delay

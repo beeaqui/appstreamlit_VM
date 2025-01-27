@@ -1,4 +1,3 @@
-# Imports
 from datetime import datetime
 import datetime
 import random
@@ -12,7 +11,6 @@ from Order import *
 keep_on_going_event = threading.Event()
 file_path = Path('client_orders.csv').resolve()
 
-# Connect to the MongoDB database
 client = MongoClient("mongodb://localhost:27017/")
 db = client['local']
 collection = db['ordersCollection']
@@ -45,45 +43,38 @@ collection26 = db['FlowProcessKPI']
 
 def update_delivery_date():
     try:
-        # Read the CSV file into memory
         with file_path.open('r') as file:
             reader = csv.DictReader(file)
-            rows = list(reader)  # Read all rows into a list
+            rows = list(reader)
     except Exception as e:
         print("Error:", e)
-        return  # Exit the function if there's an error opening the file
+        return
 
     updated_rows = []
-    current_time = datetime.datetime.now()  # Capture the current timestamp once
+    current_time = datetime.datetime.now()
 
     for row in rows:
-        # Generate random future delivery time within 1 to 12 minutes
         random_minutes = random.randint(3, 15)
         product_delivery_date = current_time + datetime.timedelta(minutes=random_minutes)
 
-        # Format and update the delivery date
         row['delivery_date'] = product_delivery_date.strftime('%H:%M') + ' h'
 
-        # Calculate time gap between current time and product delivery date
         time_gap = product_delivery_date - current_time
         total_seconds = time_gap.total_seconds()
         hours_gap = int(total_seconds // 3600)
         minutes_gap = int((total_seconds % 3600) // 60)
 
-        # Format the time gap
         time_gap_formatted = f"{hours_gap:02d}:{minutes_gap:02d} h"
-        row['time_gap'] = time_gap_formatted  # Store or update the time gap in the row if needed
+        row['time_gap'] = time_gap_formatted
 
         updated_rows.append(row)
 
-    # Write updated rows back to the CSV file
     with file_path.open('w', newline='') as file:
         fieldnames = reader.fieldnames
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(updated_rows)
 
-    # Write updated rows back to the file
     with file_path.open('w', newline='') as file:
         fieldnames = rows[0].keys()
         writer = csv.DictWriter(file, fieldnames=fieldnames)
@@ -132,7 +123,7 @@ def read_orders_from_csv():
                             row['time_gap'],
                             row['description'],
                             row['model'],
-                            int(1),  # quantity
+                            int(1),
                             row['color'],
                             row['dimensions']
                         ))
@@ -143,7 +134,6 @@ def read_orders_from_csv():
         return orders
 
 
-# Main function to run the program
 def run():
     try:
         i = 0

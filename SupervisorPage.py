@@ -33,7 +33,6 @@ def game_phase_config(game_option):
 
 
 def game_mode_config(game_mode):
-    print(game_mode, " was pressed")
     collection24.update_one({}, {'$set': {'Game Mode': game_mode}}, upsert=True)
 
 
@@ -249,14 +248,14 @@ def supervisor_page():
             else:
                 flow_process = '-'
 
-            if flow_process == '-':
+            if flow_process == '-' or flow_process is None:
                 st.markdown(
                     '<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;'
                     'text-align: center; border: 2px solid rgb(85,88,103); padding: 10px; height: 150px;">'
                     '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(85,88,103);">'
                     'LATENESS</h1>'
-                    '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
+                    '<h2 style="font-size: 25px; line-height: 20px; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(85,88,103);">'
                     f'{flow_process}</h2>'
                     '</div>', unsafe_allow_html=True)
@@ -268,7 +267,7 @@ def supervisor_page():
                     '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(85,88,103);">'
                     'LATENESS</h1>'
-                    '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
+                    '<h2 style="font-size: 25px; line-height: 20px; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(51, 115, 87);">'
                     f'{flow_process} min</h2>'
                     '</div>', unsafe_allow_html=True)
@@ -280,9 +279,9 @@ def supervisor_page():
                     '<h1 style="font-size: 18px; line-height: 1.2; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(85,88,103);">'
                     'LATENESS</h1>'
-                    '<h2 style="font-size: 30px; line-height: 20px; font-family: Verdana, sans-serif;'
+                    '<h3 style="font-size: 25px; line-height: 20px; font-family: Verdana, sans-serif;'
                     'font-weight: bold; color: rgb(207, 119, 116);">'
-                    f'{flow_process} min</h2>'
+                    f'{flow_process} min</h3'
                     '</div>', unsafe_allow_html=True)
 
         st.caption('')

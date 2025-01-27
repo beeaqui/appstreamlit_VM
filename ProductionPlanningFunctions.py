@@ -30,14 +30,14 @@ collection23 = db['SaveOrdersLogistics']
 def insert_selected_rows(selected_rows):
     for index, row in selected_rows.iterrows():
         selected_orders = collection2.insert_one(
-            {'Number': row['Number'], 'Order line': row['Order line'],
+            {'Number': row['Number'], 'Order Line': row['Order Line'],
              'Reference': row['Reference'],
              'Delivery date': row['Delivery date'], 'Time gap': row['Time gap'],
              'Description': row['Description'], 'Model': row['Model'], 'Quantity': row['Quantity'],
              'Color': row['Color'], 'Dimensions': row['Dimensions']})
 
         logistics_save = collection23.insert_one(
-            {'Number': row['Number'], 'Order line': row['Order line'],
+            {'Number': row['Number'], 'Order Line': row['Order Line'],
              'Reference': row['Reference'],
              'Delivery date': row['Delivery date'], 'Time gap': row['Time gap'],
              'Description': row['Description'], 'Model': row['Model'], 'Quantity': row['Quantity'],
@@ -48,6 +48,7 @@ def insert_logistics_orders(selected_rows):
     for index, row in selected_rows.iterrows():
         if row['Model'] == "Complex cylinder":
             data = collection19.insert_one({"Order Number": row['Number'],
+                                            "Order Line": row['Order Line'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": 0,
@@ -59,6 +60,7 @@ def insert_logistics_orders(selected_rows):
 
         if row['Model'] == "Push-in cylinder":
             data = collection19.insert_one({"Order Number": row['Number'],
+                                            "Order Line": row['Order Line'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": 0,
@@ -70,6 +72,7 @@ def insert_logistics_orders(selected_rows):
 
         if row['Model'] == "L-fit cylinder":
             data = collection19.insert_one({"Order Number": row['Number'],
+                                            "Order Line": row['Order Line'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": row['Quantity'] * 2,
@@ -81,6 +84,7 @@ def insert_logistics_orders(selected_rows):
 
         if row['Model'] == "Dual-fit cylinder":
             data = collection19.insert_one({"Order Number": row['Number'],
+                                            "Order Line": row['Order Line'],
                                             "Quantity": row['Quantity'], "Model": row['Model'],
                                             "Quantity 1": row['Quantity'], "Quantity 2": row['Quantity'],
                                             "Quantity 3": row['Quantity'],
@@ -101,7 +105,7 @@ def insert_datetime_selected_rows(selected_rows):
 
     for index, row in selected_rows.iterrows():
         order_number = row['Number']
-        order_line = row['Order line']
+        order_line = row['Order Line']
 
         data_to_insert = {
             'Order Number': order_number,
@@ -118,7 +122,7 @@ def insert_datetime_selected_rows(selected_rows):
 
 def delete_selected_rows(selected_rows):
     for index, row in selected_rows.iterrows():
-        my_row = {'order_line': row['Order line']}
+        my_row = {'order_line': row['Order Line']}
         collection.delete_one(my_row)
 
 
@@ -134,25 +138,25 @@ def insert_pre(selected_rows):
     collection14.drop()
 
     for index, row in selected_rows.iterrows():
-        existing_document = collection14.find_one({'Order line': row['Order line']})
+        existing_document = collection14.find_one({'Order Line': row['Order Line']})
 
         if not existing_document:
-            ppselected_orders = collection14.insert_one({'Order line': row['Order line']})
+            ppselected_orders = collection14.insert_one({'Order Line': row['Order Line']})
 
 
 def find_pre(order_df, table_ids_selected):
-    pred = collection14.find({}, {'_id': 0, 'Order line': 1})
+    pred = collection14.find({}, {'_id': 0, 'Order Line': 1})
     df_pre_selected = pd.DataFrame(list(pred))
 
     if df_pre_selected.empty:
         re_selected_orders = []
     else:
-        re_selected_orders = df_pre_selected['Order line']
+        re_selected_orders = df_pre_selected['Order Line']
 
         for number in re_selected_orders:
 
-            if number in order_df['Order line'].values:
-                position = order_df.index[order_df['Order line'] == number][0]
+            if number in order_df['Order Line'].values:
+                position = order_df.index[order_df['Order Line'] == number][0]
                 table_ids_selected[str(position)] = True
 
     return table_ids_selected
@@ -165,14 +169,12 @@ def create_grid():
 
     data = find_data_order()
 
-    # Create DataFrame from order data
     order_df = pd.DataFrame(find_data_order(),
                             columns=['number', 'order_line', 'reference', 'delivery_date', 'time_gap', 'description',
                                      'model', 'quantity', 'color', 'dimensions'])
 
-    # Rename columns
     order_df = order_df.rename(columns={
-        'number': 'Number', 'order_line': 'Order line', 'reference': 'Reference',
+        'number': 'Number', 'order_line': 'Order Line', 'reference': 'Reference',
         'delivery_date': 'Delivery date', 'time_gap': 'Time gap', 'description': 'Description',
         'model': 'Model', 'quantity': 'Quantity', 'color': 'Color', 'dimensions': 'Dimensions'
     })
@@ -187,21 +189,18 @@ def create_grid():
         param2 = document["Medium Priority"]
 
     def get_color(time_gap):
-        if pd.isna(time_gap):  # Check if the time gap is NaN or missing
+        if pd.isna(time_gap):
             return ''
 
         time_gap = str(time_gap)
 
-        # Remove any non-numeric characters like 'h' using regular expressions
         time_cleaned = re.sub(r'[^0-9:]', '', time_gap)
 
-        # If time_cleaned is empty, return default color
         if not time_cleaned:
-            return 'background-color: rgb(255, 255, 255);'  # Default color
+            return 'background-color: rgb(255, 255, 255);'
 
         time_parts = list(map(int, time_cleaned.split(":")))
 
-        # Ensure the time gap has hours, minutes, and seconds (add zeros if missing)
         while len(time_parts) < 3:
             time_parts.append(0)
 
@@ -210,45 +209,39 @@ def create_grid():
             return 'background-color: rgb(213, 96, 98);'  # High Priority
         elif total_hours <= param2:
             return 'background-color: rgb(244, 211, 94);'  # Medium Priority
-        return 'background-color: rgb(255, 255, 255);'  # Default color
+        return 'background-color: rgb(255, 255, 255);'
 
-    # Initialize the selected IDs
     table_ids_selected = {}
 
-    # Use find_pre to get previous selections
     table_ids_selected = find_pre(order_df, table_ids_selected)
 
     if "selected_rows" not in st.session_state:
         st.session_state.selected_rows = []
     order_df['Select'] = order_df.index.isin(st.session_state.selected_rows)
 
-    # Rearranging the columns as per the specified order
-    column_order = ['Select', 'Number', 'Order line', 'Delivery date', 'Time gap',
+    column_order = ['Select', 'Number', 'Order Line', 'Delivery date', 'Time gap',
                     'Quantity', 'Model', 'Reference', 'Description', 'Color', 'Dimensions']
     order_df = order_df[column_order]
 
-    # Apply color function to the "Time gap" column using map
     styled_order_df = order_df.style.applymap(get_color, subset=['Time gap'])
 
-    # Get DataFrame row-selections from the user with st.data_editor
     grid_container = st.data_editor(
         styled_order_df,
         hide_index=True,
         column_config={"Select": st.column_config.CheckboxColumn(required=True)},
-        disabled=[col for col in order_df.columns if col != 'Select'],  # Disable all columns except 'Select'
+        disabled=[col for col in order_df.columns if col != 'Select'],
     )
 
-    # Filter the DataFrame based on selections
     selected_rows = grid_container[grid_container['Select']]
 
-    st.session_state.selected_rows = selected_rows['Order line'].tolist()
+    st.session_state.selected_rows = selected_rows['Order Line'].tolist()
 
     return grid_container
 
 
 def find_selected_rows():
 
-    data_selected_rows = collection2.find({}, {'_id': 0, 'Number': 1, 'Order line': 1,
+    data_selected_rows = collection2.find({}, {'_id': 0, 'Number': 1, 'Order Line': 1,
                                                'Reference': 1,
                                                'Delivery date': 1, 'Time gap': 1, 'Description': 1, 'Model': 1,
                                                'Quantity': 1, 'Color': 1, 'Dimensions': 1})
@@ -268,7 +261,7 @@ def create_grid_selected_rows():
         rows_df = rows_df.drop(columns=['Dimensions'])
 
     if 'Quantity' in rows_df.columns:
-        columns = ['Number', 'Order line', 'Reference', 'Quantity', 'Delivery date', 'Model',
+        columns = ['Number', 'Order Line', 'Reference', 'Quantity', 'Delivery date', 'Model',
                    'Description']
         rows_df = rows_df.reindex(columns=columns)
 
@@ -276,15 +269,15 @@ def create_grid_selected_rows():
         'Number': 'Number',
         'Reference': 'Reference'
     })
-    # Rearranging the columns as per the specified order
-    column_order = ['Number', 'Order line', 'Delivery date',
+
+    column_order = ['Number', 'Order Line', 'Delivery date',
                     'Quantity', 'Model', 'Reference', 'Description']
     rows_df = rows_df[column_order]
 
     data_frame_selected_rows = st.dataframe(rows_df,
                                             column_config={
                                                 "Number": "Number",
-                                                "Order line": "Order line",
+                                                "Order Line": "Order Line",
                                                 'Reference': "Reference",
                                                 'Quantity': "Quantity",
                                                 'Delivery date': "Delivery date",
@@ -372,7 +365,7 @@ def insert_production_finished_rows(selected_rows):
     for index, row in selected_rows.iterrows():
         order_number = row['Number']
         order_numbers.append(order_number)
-        order_line = row['Order line']
+        order_line = row['Order Line']
         order_lines.append(order_line)
 
         data_to_insert['Order Number'] = order_numbers

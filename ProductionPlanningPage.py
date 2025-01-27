@@ -52,7 +52,6 @@ def production_page():
                 st_autorefresh(limit=2, key=f'{selected_rows}')
         st.title("")
 
-        # Display a message indicating where the selected orders will be produced
         st.title(":grey[Orders released]", help='''
                 \n The chosen orders will be displayed below, in **Orders released** 
                 section. This platform provides the tools you need to stay organized and keep your 
@@ -63,13 +62,10 @@ def production_page():
         count = collection2.count_documents({})
 
         if count != 0:
-            # Create a grid container for displaying selected rows of the orders to be printed
             data_frame_selected_rows = create_grid_selected_rows()
 
-            # Directory of PDF file created before with the selected rows
             pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
 
-            # Read the PDF file as bytes
             with open(pdf_filename, "rb") as pdf_file:
                 pdf_bytes = pdf_file.read()
 
@@ -77,7 +73,6 @@ def production_page():
 
             col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
-                # pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
                 btn = open_pdf_selected_orders()
                 if btn:
                     collection2.drop()
@@ -97,7 +92,6 @@ def production_page():
 
         st.title("")
 
-        # Display a message indicating where the selected orders will be produced
         st.title(":grey[Orders released]", help='''
                 \n The chosen orders will be displayed below, in **Orders released** 
                 section. This platform provides the tools you need to stay organized and keep your 
@@ -108,13 +102,10 @@ def production_page():
         count = collection2.count_documents({})
 
         if count != 0:
-            # Create a grid container for displaying selected rows of the orders to be printed
             data_frame_selected_rows = create_grid_selected_rows()
 
-            # Directory of PDF file created before with the selected rows
             pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
 
-            # Read the PDF file as bytes
             with open(pdf_filename, "rb") as pdf_file:
                 pdf_bytes = pdf_file.read()
 
@@ -122,7 +113,6 @@ def production_page():
 
             col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
-                # pdf_filename = r"pdf_files/Selected_Orders_PDF.pdf"
                 btn = open_pdf_selected_orders()
                 if btn:
                     collection2.drop()

@@ -1,4 +1,3 @@
-# Imports
 from ProductionPlanningPage import *
 from QualityPage import *
 from ExpeditionPage import *
@@ -22,12 +21,10 @@ def unique_key(page_name):
     return f"{page_name}_{int(time.time())}"
 
 
-# Define a function named 'website' where it is all the design part of the application
 def website():
     users = fetch_users()
     usernames = [user['username'] for user in users]
 
-    # Create a dictionary of user credentials for authentication
     credentials = {'usernames': {}}
 
     for user in users:
@@ -101,7 +98,6 @@ def website():
                         menu_icon="house",
                         default_index=0)
 
-                    # User is authenticated, display the main application interface
                     authenticator.logout('Log Out', 'sidebar')
 
                 if selected == "Supervisor":
@@ -154,6 +150,5 @@ def website():
             st.error('Invalid username or password. Please check your credentials and try again.')
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     website()

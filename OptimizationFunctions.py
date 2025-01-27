@@ -80,7 +80,6 @@ def solution(coefficients, x_coefficients, y_coefficients, objective_coefficient
     fig.add_trace(go.Scatter(x=standard_coordinates, y=sensor_kit_coordinates, line=dict(color='black'),
                              mode='markers', marker=dict(size=5), name='Trajectory'))
 
-    # style updates
     fig.update_layout(xaxis=dict(title='Complex cylinder', range=[min(point[0] for point in vertices_polygon) - 2,
                                  max(point[0] for point in vertices_polygon) + 2], title_font=dict(color='black'),
                                  tickfont=dict(color='black')),
@@ -110,10 +109,8 @@ def find_intersections_trajectory(coefficients, x_coefficients, y_coefficients):
                 if rank == augmented_matrix.shape[1] - 1:
                     pair_intersection = np.linalg.lstsq(augmented_matrix[:, :-1], augmented_matrix[:, -1], rcond=None)[
                         0]
-                    # Convert -0.0 to 0.0
                     pair_intersection = [0.0 if abs(coord) < 1e-10 else coord for coord in pair_intersection]
 
-                    # Check for duplicates
                     if pair_intersection not in intersections:
                         intersections.append(pair_intersection)
 
