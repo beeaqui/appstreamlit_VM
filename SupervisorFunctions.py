@@ -688,7 +688,7 @@ def leadtime_plot(width_plot):
         df = pd.DataFrame({'Order Line': [], 'Lead Time (min)': []})
 
     if not df.empty:
-        df['Lead Time (min)'] = df['Lead Time (min)'].applymap(lambda x: f"{x:.2f}")
+        df['Lead Time (min)'] = df['Lead Time (min)'].map(lambda x: f"{x:.2f}")
         df['Order Line'] = pd.Categorical(df['Order Line'], ordered=True)
 
     fig = px.bar(df, x='Order Line', y='Lead Time (min)', orientation='v',
