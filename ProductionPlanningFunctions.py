@@ -223,7 +223,7 @@ def create_grid():
                     'Quantity', 'Model', 'Reference', 'Description', 'Color', 'Dimensions']
     order_df = order_df[column_order]
 
-    styled_order_df = order_df.style.applymap(get_color, subset=['Time gap'])
+    styled_order_df = order_df.style.map(get_color, subset=['Time gap'])
 
     grid_container = st.data_editor(
         styled_order_df,

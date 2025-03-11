@@ -135,7 +135,7 @@ def kpis_orders():
 
     df = pd.DataFrame(data)
 
-    styled_df = df.style.applymap(color_delay, subset=['Delay'])
+    styled_df = df.style.map(color_delay, subset=['Delay'])
     st.data_editor(styled_df, hide_index=True, disabled=True, use_container_width=True)
 
 
